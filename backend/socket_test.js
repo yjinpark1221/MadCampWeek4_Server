@@ -6,4 +6,4 @@ msg.data = 'hello world';
 ws.onopen =  function (e) {
 	console.log('open');
 	ws.send(JSON.stringify(msg));
-}
+};
