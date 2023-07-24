@@ -1,37 +1,12 @@
+const { MAX_PLAYERS, MIN_PLAYERS, MAX_NUM } = require('./config');
 const { Player, Group, State } = require('./models');
+let { playerCnt, groupCnt, players, groups } = require('./data');
+const { isTurn, isValidCard, gameFirst, gameBegin, gameEnd, roundBegin, roundEnd, turnAction, turnEnd } = require('./gameLogic');
+
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 80 }, () => {
     console.log('서버 시작');
 });
-const { isTurn, isValidCard, gameFirst, gameBegin, gameEnd, roundBegin, roundEnd, turnAction, turnEnd, getNextPid } = require('./gameLogic');
-
-const MAX_PLAYERS = 8;
-const MIN_PLAYERS = 4;
-const MAX_NUM = 12;
-
-let groupCnt = 0;
-let playerCnt = 0;
-
-let groups = [];
-let players = [];
-let cards = [13, 13];
-
-for (let i = 1; i <= MAX_NUM; ++i) {
-    for (let j = 0; j < i; ++j) {
-        cards.push(i);
-    }
-}
-
-
-// groups.push(new Group([1, 2, 3, 4, 5, 6, 7, 8]))
-// players.push(new Player(1))
-// players.push(new Player(2))
-// players.push(new Player(3))
-// players.push(new Player(4))
-// players.push(new Player(5))
-// players.push(new Player(6))
-// players.push(new Player(7))
-// players.push(new Player(8))
 
 
 // 소켓에 플레이어가 연결된 경우
@@ -109,9 +84,11 @@ wss.on('listening', () => {
    console.log('리스닝 ...');
 });
 
+
 function sendGroupList(playerId) {
     sendMessage(playerId, 'groupList', groups.toString());
 }
+
 
 function getMembers(gid) {
     let members = [];
@@ -125,6 +102,7 @@ function getMembers(gid) {
     return members;
 }
 
+
 function broadcastGroup(gid) {
     let groupInfo = {
         name: groups[gid].name,
@@ -132,6 +110,7 @@ function broadcastGroup(gid) {
     };
     broadcastMessage(gid, 'groupInfo', groupInfo);
 }
+
 
 function enterGroup(pid, gid) {
     if (groups[gid].playerCnt >= MAX_PLAYERS || groups[gid].inGame) {
@@ -144,6 +123,7 @@ function enterGroup(pid, gid) {
         broadcastGroup(gid);
     }
 }
+
 
 function exitGroup(pid) {
     let gid = players[pid].gid;
@@ -161,6 +141,7 @@ function exitGroup(pid) {
     broadcastGroup(gid);
 }
 
+
 function setReady(pid, ready) {
     let gid = players[pid].gid;
 
@@ -174,6 +155,7 @@ function setReady(pid, ready) {
     broadcastGroup(gid);
 }
 
+
 function canStart(gid) {
     if (groups[gid].playerCnt < MIN_PLAYERS || groups[gid].playerCnt > MAX_PLAYERS)
         return false;
@@ -186,26 +168,6 @@ function canStart(gid) {
     return true;
 }
 
-
-function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-  }
-
-
-function shuffleCards(num) {
-    if (num < MIN_PLAYERS || num > MAX_PLAYERS) {
-        return;
-    }
-    shuffle(cards);
-    let res = [];
-    for (let i = 0; i < num; ++i) {
-        res.push([]);
-    }
-    for (let i = 0; i < cards.length(); ++i) {
-        res[i % num].push(cards[i]);
-    }
-    return res;
-}
 
 
 // 소켓 메시지 생성자 - json 형식을 반환
