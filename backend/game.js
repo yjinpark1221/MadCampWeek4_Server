@@ -1,28 +1,17 @@
-const { Player, Group, State } = require('./models');
+const { Player, Group, State, GroupState } = require('./models');
 const { playerCnt, groupCnt, players, groups } = require('./data');
-const { shuffle, shuffleCards } = require('./utils');
+const { shuffle, shuffleCards, isTurn, isValidCard } = require('./utils');
+const { JOKER } = require('./constants');
 
 
-// 그룹 내에서 플레이어 차례인지 확인
-function isTurn(pid) {
-    let gid = players[pid].gid;
-    return (groups[gid].turn == pid);
-}
-
-
-// 플레이어가 낼 수 있는 카드인지, 게임 진행 상황 상 알맞은 카드인지 확인
+// 게임 진행 상황 상 알맞은 카드인지 확인
 function isValidCard(pid, usedCards) {
     let gid = players[pid].gid;
-    let inHandCards = players[pid].cards;
 
     // ------------------------------------------------------------
     // 플레이어의 핸드에 있는 카드인지 확인
-    for(let i = 1; i <= 13; ++i) {
-        let handCnts = inHandCards.filter((x) => x == i).length;
-        let usedCnts = usedCards.filter((x) => x == i).length;
-        if(handCnts < usedCnts) {
-            return false;
-        }
+    if(!isInHands(pid, usedCards)) {
+        return false;
     }
 
     // ------------------------------------------------------------
@@ -30,7 +19,7 @@ function isValidCard(pid, usedCards) {
 
     // 조커를 가장 작은 값의 카드로 변환
     usedCards.sort((a, b) => a - b);
-    usedCards = usedCards.map((x) => (x != 13 ? x : usedCards[0]));
+    usedCards = usedCards.map((x) => (x != JOKER ? x : usedCards[0]));
 
     // 카드가 같은 종류인지 확인
     usedCards.sort((a, b) => a - b);
@@ -87,6 +76,44 @@ function gameBegin(gid) {
 
 function gameEnd(gid) {
     // TODO: DB에 전적 업데이트
+}
+
+
+// 플레이어(pid)가 혁명을 외치는 것 처리
+function gameRevolution(pid, gid, isRevolution) {
+    if(!isRevolution) {
+        return;
+    }
+
+    // 대혁명
+    if(pid == groups[gid].players[groups[gid].playerCnt - 1]) {
+        groups[gid].currentRank.reverse();
+    }
+
+    // 세금 단계 건너뛰기
+    groups[gid].state = GroupState.TURN_WAIT;
+    roundBegin(gid, groups[gid].currentRank[0]);
+}
+
+
+// 플레이어(pid)가 줄 카드를
+// TODO: validation
+// 1. pidx <= 1
+// 2. selectedCards.length == 2-pidx
+// 3. 플레이어(pid) have selectedCards
+function gameTax(pid, gid, selectedCards) {
+    const pidx = getPlayerIdx(pid);
+    const changeNum = 2 - pidx;
+
+    const slavePid = groups[gid].currentRank[groups[gid].playerCnt-1 - pidx];
+    players[slavePid].cards.sort((a, b) => a - b);
+    const bestCards = players[slavePid].cards.slice(0, changeNum);
+
+    // 카드 교환
+    removeCards(pid, selectedCards);
+    removeCards(slavePid, bestCards);
+    players[pid].cards.push(...bestCards);
+    players[slavePid].cards.push(...selectedCards);
 }
 
 
@@ -166,13 +193,31 @@ function turnEnd(pid) {
 }
 
 
+// pid의 currentRank에서의 인덱스 구하기
+function getPlayerIdx(pid) {
+    let gid = players[pid].gid;
+    let pidx = groups[gid].players.findIndex((x) => x == pid);
+    return pidx;
+}
+
+
+// pid의 다음 차례 플레이어 구하기
 function getNextPid(gid, lastPid) {
-    let pidx = groups[gid].players.findIndex((pid) => pid == lastPid);
+    let pidx = getPlayerIdx(lastPid);
     do {
         pidx += 1;
         pidx %= groups[gid].playerCnt;
     } while(groups[gid].players[pidx].state == State.DONE);
     return groups[gid].players[pidx];
+}
+
+
+// 플레이어(pid)의 손에서 cards를 제거
+function removeCards(pid, cards) {
+    for(let card of cards) {
+        players[pid].cards.remove(card);
+        players[pid].cardCnt -= 1;
+    }
 }
 
 
@@ -182,6 +227,8 @@ module.exports = {
 	gameFirst,
 	gameBegin,
 	gameEnd,
+    gameRevolution,
+    gameTax,
 	roundBegin,
 	roundEnd,
 	turnAction,

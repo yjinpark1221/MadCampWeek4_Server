@@ -1,5 +1,5 @@
-const { MAX_PLAYERS, MIN_PLAYERS, MAX_NUM } = require('./config');
-const { Player, Group, State } = require('./models');
+const { MAX_PLAYERS, MIN_PLAYERS, MAX_NUM } = require('./constants');
+const { Player, Group, PlayerState, GroupState } = require('./models');
 let { playerCnt, groupCnt, players, groups } = require('./data');
 const { isTurn, isValidCard, gameFirst, gameBegin, gameEnd, roundBegin, roundEnd, turnAction, turnEnd } = require('./gameLogic');
 
@@ -20,6 +20,7 @@ wss.on('connection', function(ws) {
     sendGroupList(playerId);
 
     // 유저로부터 메시지를 받은 경우
+    // TODO: 유저로부터 온 메시지 validation (우선순위 낮음)
     ws.on('message', (msg) => {
         if (Buffer.isBuffer(msg)) {
             msg = msg.toString('utf8');
@@ -41,6 +42,9 @@ wss.on('connection', function(ws) {
             groups.push(new Group(msg.data));
             enterGroup(playerId, gid);
         }
+        else if (msg.type == 'notReady') {
+            setReady(playerId, false);
+        }
         else if (msg.type == 'ready') {
             setReady(playerId, true);
 
@@ -49,13 +53,18 @@ wss.on('connection', function(ws) {
             if (canStart(gid)) {
                 gameFirst(gid);
                 gameBegin(gid);
-                // TODO: revoluction 처리
-                // TODO: tax 처리
-                roundBegin(gid, groups[gid].currentRank[0]);
+                groups[gid].state = GroupState.REVOLUTION_WAIT;
             }
         }
-        else if (msg.type == 'notReady') {
-            setReady(playerId, false);
+        else if(msg.type == 'revolution') {
+            gameRevolution(pid, gid, msg.data);
+            groups[gid].state = GroupState.TAX_WAIT;
+        }
+        else if(msg.type == 'tax') {
+            // TODO: 2명이 세금을 내면 게임 시작
+            // gameTax(pid, gid, msg.data);
+            groups[gid].state = GroupState.TURN_WAIT;
+            roundBegin(gid, groups[gid].currentRank[0]);
         }
         else if (msg.type == 'card') {
             let cards = parseCard(msg.data);
@@ -119,7 +128,7 @@ function enterGroup(pid, gid) {
     else {
         groups[gid].playerCnt++;
         groups[gid].players.push(pid);
-        players[pid].state = State.NOTREADY;
+        players[pid].state = PlayerState.NOTREADY;
         broadcastGroup(gid);
     }
 }
@@ -127,12 +136,12 @@ function enterGroup(pid, gid) {
 
 function exitGroup(pid) {
     let gid = players[pid].gid;
-    if (players[pid].state == State.IDLE || gid == -1)  {
+    if (players[pid].state == PlayerState.IDLE || gid == -1)  {
         return;
     }
 
     players[pid].gid = -1;
-    players[pid].state = State.IDLE;
+    players[pid].state = PlayerState.IDLE;
 
     groups[gid].player = groups[gid].players.splice(groups[gid].players.indexOf(pid), 1);
     groups[gid].currentRank = groups[gid].currentRank.splice(groups[gid].currentRank.indexOf(pid), 1);
@@ -146,10 +155,10 @@ function setReady(pid, ready) {
     let gid = players[pid].gid;
 
     if (ready) {
-        players[pid].state = State.READY;
+        players[pid].state = PlayerState.READY;
     }
     else {
-        players[pid].state = State.NOTREADY;
+        players[pid].state = PlayerState.NOTREADY;
     }
 
     broadcastGroup(gid);
@@ -161,7 +170,7 @@ function canStart(gid) {
         return false;
 
     for (var pid of groups[gid].players) {
-        if (players[pid].state != State.READY) {
+        if (players[pid].state != PlayerState.READY) {
             return false;
         }
     }

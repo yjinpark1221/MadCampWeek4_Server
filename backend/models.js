@@ -6,7 +6,7 @@ class Player {
 		this.name = '';
 		this.cards = [];
 		this.cardCnt = 0;
-		this.state = State.IDLE;
+		this.state = PlayerState.IDLE;
 	}
 }
 
@@ -22,10 +22,11 @@ class Group {
 		this.inGame = false;
 		this.lastPid = -1;
 		this.lastUsedCards = [];
+		this.state = GroupState.BEFORE_GAME;
 	}
 }
 
-const State = {
+const PlayerState = {
     IDLE: "그룹 선택 중",       // 그룹 입장 전
     NOTREADY: "준비 중",        // 그룹 입장 후
     READY: "준비 완료",         // 게임 대기 중 (다른 플레이어들 기다리는 중)
@@ -33,11 +34,21 @@ const State = {
     PASS: "패스",               // 라운드에서 패스를 외치고 다음 라운드를 대기 중
     DONE: "기다리는 중",        // 게임 끝나기를 기다리는 중, 카드를 전부 사용
 };
-Object.freeze(State);
+Object.freeze(PlayerState);
+
+const GroupState = {
+	BEFORE_GAME: "게임 시작 대기 중",
+	REVOLUTION_WAIT: "혁명 대기 중",
+	TAX_WAIT: "세금 대기 중",
+	TURN_WAIT: "턴 대기 중",
+	OTHER: "기타",
+};
+Object.freeze(GroupState);
 
 
 module.exports = {
 	Player,
 	Group,
-	State,
+	PlayerState,
+	GroupState,
 };
