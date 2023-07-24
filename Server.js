@@ -1,3 +1,4 @@
+const { group } = require('console');
 const { lstat } = require('fs');
 const WebSocket = require('ws');
 const wss= new WebSocket.Server({ port: 80 },()=>{
@@ -31,6 +32,7 @@ function Player(ws) {
 }
 
 let groupId = 0;
+// TODO: 2판 하면 종료되게끔 속성 추가
 function Group(name) {
     this.name = name;
     this.players = [];
@@ -39,14 +41,17 @@ function Group(name) {
     this.currentRank = [];
     this.nextRank = [];
     this.inGame = false;
+    this.lastPid = -1;
+    this.lastUsedCards = [];
 }
 
 const State = {
     IDLE: "그룹 선택 중",       // 그룹 입장 전
     NOTREADY: "준비 중",        // 그룹 입장 후
     READY: "준비 완료",         // 게임 대기 중 (다른 플레이어들 기다리는 중)
-    PLAYING: "플레이 중",       // 게임 플레이 중
-    DONE: "기다리는 중",        // 게임 끝나기를 기다리는 중
+    PLAYING: "플레이 중",       // 게임 플레이 중, 라운드에 참여 중
+    PASS: "패스",               // 라운드에서 패스를 외치고 다음 라운드를 대기 중
+    DONE: "기다리는 중",        // 게임 끝나기를 기다리는 중, 카드를 전부 사용
 };
 Object.freeze(State);
 
@@ -96,22 +101,31 @@ wss.on('connection', function(ws) {
         }
         else if (msg.type == 'ready') {
             setReady(playerId, true);
+
+            // 모두 Ready 상태면 바로 시작
+            let gid = players[playerId].gid;
+            if(groups[gid].players.filter((pid) => players[pid].state == State.READY).length
+                == groups[gid].playerCnt) {
+                gameFirst(gid);
+                gameBegin(gid);
+                // TODO: revoluction 처리
+                // TODO: tax 처리
+                roundBegin(gid, groups[gid].currentRank[0]);
+            }
         }
         else if (msg.type == 'notReady') {
             setReady(playerId, false);
         }
         else if (msg.type == 'card') {
-            let cards = parseCard(msg.data)
-            // TODO : 그룹 내에서 플레이어 차례인지 확인하는 함수 구현
-            // TODO : 플레이어가 낼 수 있는 카드인지, 게임 진행 상황 상 알맞은 카드인지 확인하는 함수 구현
+            let cards = parseCard(msg.data);
             if (isTurn(playerId)) {
                 if (isValidCard(playerId, cards)) {
-                    // TODO : 낸 카드 처리하고, 차례 바꾸고, 지금 낸 카드, 현재 차례, 플레이어 별 손에 남아있는 카드, 게임 끝났는지 등 broadcast하는 함수 구현
-                    changeTurn(playerId, cards);
+                    turnAction(playerId, cards);
+                    turnEnd(playerId);
                 }
                 else {
                     // TODO : 낼 수 없는 카드임을 알리는 함수 구현
-                    rejectCards(playerId);
+                    // rejectCards(playerId);
                 }
             }
             // 차례가 아니면 그냥 무시
@@ -125,7 +139,7 @@ wss.on('connection', function(ws) {
 });
 
 // 서버 소켓이 기다리는 경우 로그 출력
-wss.on('listening',()=>{
+wss.on('listening', ()=>{
    console.log('리스닝 ...')
 })
 
@@ -282,14 +296,15 @@ function sendMessage(id, type, data) {
     users[id].ws.send(JSON.stringify(new SocketMessage(type, data)));
 }
 
-// pid의 플레이어가 현재 차례인지 여부 반환
+// 그룹 내에서 플레이어 차례인지 확인
 function isTurn(pid) {
     let gid = players[pid].gid;
     return (groups[gid].turn == pid);
 }
 
-// pid의 플레이어가 usedCards를 내는 것이 valid한지 여부 반환
+// 플레이어가 낼 수 있는 카드인지, 게임 진행 상황 상 알맞은 카드인지 확인
 function isValidCard(pid, usedCards) {
+    let gid = players[pid].gid;
     let inHandCards = players[pid].cards;
 
     // ------------------------------------------------------------
@@ -303,7 +318,7 @@ function isValidCard(pid, usedCards) {
     }
 
     // ------------------------------------------------------------
-    // TODO: 게임 진행 상황 상 알맞은 카드인지 확인
+    // 게임 진행 상황 상 알맞은 카드인지 확인
 
     // 조커를 가장 작은 값의 카드로 변환
     usedCards.sort((a, b) => a - b);
@@ -315,25 +330,134 @@ function isValidCard(pid, usedCards) {
         return false;
     }
 
-    // TODO: 마지막으로 사용된 카드를 저장할 필요 있음
+    if(groups[gid].lastUsedCards.length != 0) {
+        // 같은 개수인지 확인
+        if(usedCards.length != groups[gid].lastUsedCards.length) {
+            return false;
+        }
 
-    // 같은 개수인지 확인
-    // if(usedCards.length != lastUsedCards.length) {
-    //     return false;
-    // }
-
-    // 더 작은 값인지 확인
-    // if(usedCards[0] >= lastUsedCards[0]) {
-    //     return false;
-    // }
+        // 더 작은 값인지 확인
+        if(usedCards[0] >= groupds[gid].lastUsedCards[0]) {
+            return false;
+        }
+    }
 
     return true;
 }
 
-function changeTurn(pid, usedCards) {
+function gameFirst(gid) {
+    // 처음 지위는 랜덤
+    groups[gid].nextRank = groups[gid].players.slice();
+    shuffle(groups[gid].nextRank);
+
+    groups[gid].inGame = true;
+}
+
+function gameBegin(gid) {
+    for(let pid of groups[gid].players) {
+        players[pid].state = State.PLAYING;
+    }
+
+    // 이전 판 결과 바탕으로 이번 판 지위 설정
+    groups[gid].currentRank = groups[gid].nextRank.slice();
+    groups[gid].nextRank = [];
+
+    // 카드 셔플 및 분배
+    let splitCard = shuffleCards(groups[gid].playerCnt);
+    groups[gid].players.forEach((pid, idx) => {
+        players[pid].cards = splitCard[idx].slice();
+    });
+
+    // TODO: 혁명 입력 대기
+
+    // TODO: 세금 입력 대기
 
 }
 
+function gameEnd(gid) {
+    // TODO: DB에 전적 업데이트
+}
+
+function roundBegin(gid, startPid) {
+    groups[gid].lastPid = -1;
+    groups[gid].lastUsedCards = [];
+    groups[gid].turn = startPid;
+    for(let pid of groups[gid].players) {
+        if(players[pid].state == State.PASS) {
+            players[pid].state = State.PLAYING;
+        }
+    }
+}
+
+function roundEnd(gid) {
+}
+
+// 카드를 내거나 패스하는 행동 처리
+function turnAction(pid, usedCards) {
+    // 패스 처리
+    if(usedCards.length == 0) {
+        players[pid].state = State.PASS;
+        return;
+    }
+
+    let gid = players[pid].gid;
+    groups[gid].lastPid = pid;
+    groups[gid].lastUsedCards = usedCards;
+
+    for(let card of usedCards) {
+        players[pid].cards.remove(card);
+        players[pid].cardCnt -= 1;
+    }
+}
+
+// 게임 종료, 라운드 종료, 다음 차례 결정
+function turnEnd(pid) {
+    let gid = players[pid].gid;
+
+    // 방금 액션을 취한 플레이어가 카드를 전부 사용
+    if(players[pid].cardCnt == 0) {
+        players[pid].state = State.DONE;
+        groups[gid].nextRank.push(pid);
+        // broadcast?
+    }
+
+    // 게임 종료: 카드를 전부 사용하지 않은 플레이어가 1명
+    let notDones = groups[gid].players.filter((pid) => players[pid].state != State.DONE);
+    let notDoneCnt = notDones.length;
+    if(notDoneCnt == 1) {
+        let gameLastPid = notDones[0];
+        groups[gid].nextRank.push(gameLastPid);
+        gameEnd(gid);
+        gameBegin(gid);
+        return;
+    }
+
+    // 라운드 종료: 모든 유저가 패스
+    let playings = groups[gid].players.filter((pid) => players[pid].state == State.PLAYING);
+    let playingCnt = playings.length;
+    if(playingCnt == 0) {
+        let nextPid =
+            players[groups[gid].lastPid].state != State.DONE
+            ? groups[gid].lastPid
+            : getNextPid(gid, groups[gid].lastPid);
+
+        roundEnd(gid);
+        roundBegin(gid, nextPid);
+        return;
+    }
+
+    // 다음 차례 구하기
+    groups[gid].turn = getNextPid(gid, groups[gid].turn);
+}
+
+function getNextPid(gid, lastPid) {
+    let pidx = groups[gid].players.findIndex((pid) => pid == lastPid);
+    do {
+        pidx += 1;
+        pidx %= groups[gid].playerCnt;
+    } while(groups[gid].players[pidx].state == State.DONE);
+    return groups[gid].players[pidx];
+}
 
 
 
