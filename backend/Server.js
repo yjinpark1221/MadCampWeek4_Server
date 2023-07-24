@@ -1,9 +1,8 @@
-const { group } = require('console');
-const { lstat } = require('fs');
 const WebSocket = require('ws');
-const wss= new WebSocket.Server({ port: 80 },()=>{
+const wss = new WebSocket.Server({ port: 80 }, () => {
     console.log('서버 시작');
 });
+// const wss = new WebSocket('ws://localhost:4000');
 
 const MAX_PLAYERS = 8;
 const MIN_PLAYERS = 4;
@@ -67,7 +66,6 @@ Object.freeze(State);
 // players.push(new Player(8))
 
 
-
 // 소켓에 플레이어가 연결된 경우
 wss.on('connection', function(ws) {
     // 유저 아이디 발급
@@ -83,6 +81,7 @@ wss.on('connection', function(ws) {
         if (Buffer.isBuffer(msg)) {
             msg = msg.toString('utf8');
         }
+        console.log(playerId + ' : ' + msg);
         msg = JSON.parse(msg);
 
         if (msg.type == 'name') {
@@ -104,8 +103,7 @@ wss.on('connection', function(ws) {
 
             // 모두 Ready 상태면 바로 시작
             let gid = players[playerId].gid;
-            if(groups[gid].players.filter((pid) => players[pid].state == State.READY).length
-                == groups[gid].playerCnt) {
+            if (canStart(gid)) {
                 gameFirst(gid);
                 gameBegin(gid);
                 // TODO: revoluction 처리
@@ -139,9 +137,9 @@ wss.on('connection', function(ws) {
 });
 
 // 서버 소켓이 기다리는 경우 로그 출력
-wss.on('listening', ()=>{
-   console.log('리스닝 ...')
-})
+wss.on('listening', () => {
+   console.log('리스닝 ...');
+});
 
 function sendGroupList(playerId) {
     sendMessage(playerId, 'groupList', groups.toString());
@@ -180,13 +178,13 @@ function enterGroup(pid, gid) {
 }
 
 function exitGroup(pid) {
-    let gid = player[pid].gid;
+    let gid = players[pid].gid;
     if (players[pid].state == State.IDLE || gid == -1)  {
         return;
     }
 
-    player[pid].gid = -1;
-    player[pid].state = State.IDLE;
+    players[pid].gid = -1;
+    players[pid].state = State.IDLE;
 
     groups[gid].player = groups[gid].players.splice(groups[gid].players.indexOf(pid), 1);
     groups[gid].currentRank = groups[gid].currentRank.splice(groups[gid].currentRank.indexOf(pid), 1);
@@ -196,7 +194,7 @@ function exitGroup(pid) {
 }
 
 function setReady(pid, ready) {
-    let gid = player[pid].gid;
+    let gid = players[pid].gid;
 
     if (ready) {
         players[pid].state = State.READY;
@@ -206,10 +204,6 @@ function setReady(pid, ready) {
     }
 
     broadcastGroup(gid);
-
-    if (canStart(gid)) {
-        startGame(gid);
-    }
 }
 
 function canStart(gid) {
@@ -224,33 +218,11 @@ function canStart(gid) {
     return true;
 }
 
+
 function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
   }
 
-function startGame(gid) {
-    groups[gid].currentRank = groups[gid].players.slice();
-    shuffle(groups[gid].currentRank);
-    groups[gid].nextRank = [];
-    groups[gid].turn = groups[gid].currentRank[0];
-
-    console.log('beginGame ' + gid + ' , ' + groups[gid].currentRank);
-    groups[gid].inGame = true;
-
-    let splitCard = shuffleCards(groups[gid].playerCnt);
-    let idx = 0;
-    for (var pid of groups[gid].players) {
-        players[pid].state = State.PLAYING;
-        players[pid].cards = splitCard[idx++];
-        let startMsg = {
-            myCard: players[pid].cards,
-            turn: groups[gid].turn,
-            currentRank: groups[gid].currentRank,
-            members: getMembers(gid),
-        };
-        // sendMessage(pid, 'start', );
-    }
-}
 
 function shuffleCards(num) {
     if (num < MIN_PLAYERS || num > MAX_PLAYERS) {
@@ -267,15 +239,6 @@ function shuffleCards(num) {
     return res;
 }
 
-//////////////////////
-// shoot 후 상대방의 hp <= 0이 되면 게임이 끝났음을 알림
-function endGame(loser, winner) {
-    console.log('end game ' + loser + ' ' + winner);
-    sendMessage(loser, 'info', 'lose');
-    sendMessage(winner, 'info', 'win');
-    users[winner] = new UserData(users[winner].ws);
-    users[loser] = new UserData(users[loser].ws);
-}
 
 // 소켓 메시지 생성자 - json 형식을 반환
 function SocketMessage(type, data) {
@@ -293,7 +256,7 @@ function broadcastMessage(gid, type, data) {
 // id에 해당하는 유저에게 type, data를 json형식으로 보내는 함수
 function sendMessage(id, type, data) {
     if (id == 0) return;
-    users[id].ws.send(JSON.stringify(new SocketMessage(type, data)));
+    players[id].ws.send(JSON.stringify(new SocketMessage(type, data)));
 }
 
 // 그룹 내에서 플레이어 차례인지 확인
