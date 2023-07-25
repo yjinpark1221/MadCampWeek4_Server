@@ -113,7 +113,7 @@ router.get('/logout', function(req, res, next){
 })
 
 router.get('/gameselect', function(req, res, next) {
-  res.render('gameselect');
+  res.render('gamestart');
 });
 
 
