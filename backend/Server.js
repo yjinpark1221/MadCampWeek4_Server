@@ -1,7 +1,9 @@
 const { MAX_PLAYERS, MIN_PLAYERS, MAX_NUM } = require('./constants');
 const { Player, Group, PlayerState, GroupState } = require('./models');
 let { playerCnt, groupCnt, players, groups } = require('./data');
-const { isTurn, isValidCard, gameFirst, gameBegin, gameEnd, roundBegin, roundEnd, turnAction, turnEnd } = require('./gameLogic');
+const { isTurn, isValidCard, gameFirst,
+    gameBegin, gameEnd, roundBegin,
+    roundEnd, turnAction, turnEnd } = require('./game');
 
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 80 }, () => {
@@ -11,13 +13,11 @@ const wss = new WebSocket.Server({ port: 80 }, () => {
 
 // 소켓에 플레이어가 연결된 경우
 wss.on('connection', function(ws) {
-    // 유저 아이디 발급
-    let playerId = playerCnt++;
-    // 유저 목록에 유저 데이터 등록한다.
-    console.log(playerId + " connected");
+    let pid = playerCnt++;
+    console.log(pid + " connected");
     players.push(new Player(ws));
 
-    sendGroupList(playerId);
+    sendGroupList(pid);
 
     // 유저로부터 메시지를 받은 경우
     // TODO: 유저로부터 온 메시지 validation (우선순위 낮음)
@@ -25,31 +25,31 @@ wss.on('connection', function(ws) {
         if (Buffer.isBuffer(msg)) {
             msg = msg.toString('utf8');
         }
-        console.log(playerId + ' : ' + msg);
+        console.log(pid + ' : ' + msg);
         msg = JSON.parse(msg);
 
         if (msg.type == 'name') {
-            setName(playerId, msg.data);
+            setName(pid, msg.data);
         }
         else if (msg.type == 'enter') {
-            enterGroup(playerId, int.Parse(msg.data));
+            enterGroup(pid, parseInt(msg.data));
         }
         else if (msg.type == 'exit') {
-            exitGroup(playerId);
+            exitGroup(pid);
         }
         else if (msg.type == 'newGroup') {
             let gid = groupCnt++;
             groups.push(new Group(msg.data));
-            enterGroup(playerId, gid);
+            enterGroup(pid, gid);
         }
         else if (msg.type == 'notReady') {
-            setReady(playerId, false);
+            setReady(pid, false);
         }
         else if (msg.type == 'ready') {
-            setReady(playerId, true);
+            setReady(pid, true);
 
             // 모두 Ready 상태면 바로 시작
-            let gid = players[playerId].gid;
+            let gid = players[pid].gid;
             if (canStart(gid)) {
                 gameFirst(gid);
                 gameBegin(gid);
@@ -68,23 +68,23 @@ wss.on('connection', function(ws) {
         }
         else if (msg.type == 'card') {
             let cards = parseCard(msg.data);
-            if (isTurn(playerId)) {
-                if (isValidCard(playerId, cards)) {
-                    turnAction(playerId, cards);
-                    turnEnd(playerId);
+            if (isTurn(pid)) {
+                if (isValidCard(pid, cards)) {
+                    turnAction(pid, cards);
+                    turnEnd(pid);
                 }
                 else {
                     // TODO : 낼 수 없는 카드임을 알리는 함수 구현
-                    // rejectCards(playerId);
+                    // rejectCards(pid);
                 }
             }
             // 차례가 아니면 그냥 무시
         }
     });
     ws.on('close', function(msg) {
-        console.log(playerId + ' disconnected');
+        console.log(pid + ' disconnected');
 
-        exitGroup(playerId);
+        exitGroup(pid);
     });
 });
 
@@ -94,8 +94,8 @@ wss.on('listening', () => {
 });
 
 
-function sendGroupList(playerId) {
-    sendMessage(playerId, 'groupList', groups.toString());
+function sendGroupList(pid) {
+    sendMessage(pid, 'groupList', groups.toString());
 }
 
 
@@ -105,7 +105,7 @@ function getMembers(gid) {
         members.push({
             name: players[pid].name,
             state: players[pid].state,
-            cardCnt: players[pid].cards.length(),
+            cardCnt: players[pid].cards.length,
         })
     }
     return members;
@@ -118,6 +118,12 @@ function broadcastGroup(gid) {
         players: getMembers(gid),
     };
     broadcastMessage(gid, 'groupInfo', groupInfo);
+}
+
+
+function setName(pid, name) {
+    players[pid].name = name;
+    // sendMessage(pid, 'info', 'nameSet');
 }
 
 

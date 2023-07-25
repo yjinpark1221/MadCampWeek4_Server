@@ -1,6 +1,6 @@
-const { Player, Group, State, GroupState } = require('./models');
-const { playerCnt, groupCnt, players, groups } = require('./data');
-const { shuffle, shuffleCards, isTurn, isValidCard } = require('./utils');
+const { Player, Group, PlayerState, GroupState } = require('./models');
+const { players, groups } = require('./data');
+const { shuffle, shuffleCards, isTurn, isInHands } = require('./utils');
 const { JOKER } = require('./constants');
 
 
@@ -44,6 +44,8 @@ function isValidCard(pid, usedCards) {
 
 
 function gameFirst(gid) {
+    console.log('Game First');
+
     // 처음 지위는 랜덤
     groups[gid].nextRank = groups[gid].players.slice();
     shuffle(groups[gid].nextRank);
@@ -53,6 +55,8 @@ function gameFirst(gid) {
 
 
 function gameBegin(gid) {
+    console.log('Game Begin');
+
     for(let pid of groups[gid].players) {
         players[pid].state = State.PLAYING;
     }
@@ -75,12 +79,16 @@ function gameBegin(gid) {
 
 
 function gameEnd(gid) {
+    console.log('Game End');
+
     // TODO: DB에 전적 업데이트
 }
 
 
 // 플레이어(pid)가 혁명을 외치는 것 처리
 function gameRevolution(pid, gid, isRevolution) {
+    console.log('Game Revolution');
+
     if(!isRevolution) {
         return;
     }
@@ -102,6 +110,8 @@ function gameRevolution(pid, gid, isRevolution) {
 // 2. selectedCards.length == 2-pidx
 // 3. 플레이어(pid) have selectedCards
 function gameTax(pid, gid, selectedCards) {
+    console.log('Game Tax');
+
     const pidx = getPlayerIdx(pid);
     const changeNum = 2 - pidx;
 
@@ -118,6 +128,8 @@ function gameTax(pid, gid, selectedCards) {
 
 
 function roundBegin(gid, startPid) {
+    console.log('Round Begin');
+
     groups[gid].lastPid = -1;
     groups[gid].lastUsedCards = [];
     groups[gid].turn = startPid;
@@ -130,11 +142,14 @@ function roundBegin(gid, startPid) {
 
 
 function roundEnd(gid) {
+    console.log('Round End');
 }
 
 
 // 카드를 내거나 패스하는 행동 처리
 function turnAction(pid, usedCards) {
+    console.log(`Turn Action: ${pid}, ${usedCards}`);
+
     // 패스 처리
     if(usedCards.length == 0) {
         players[pid].state = State.PASS;
@@ -154,6 +169,8 @@ function turnAction(pid, usedCards) {
 
 // 게임 종료, 라운드 종료, 다음 차례 결정
 function turnEnd(pid) {
+    console.log('Turn End');
+
     let gid = players[pid].gid;
 
     // 방금 액션을 취한 플레이어가 카드를 전부 사용

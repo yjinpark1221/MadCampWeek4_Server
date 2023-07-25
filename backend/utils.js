@@ -1,6 +1,5 @@
-const { MAX_NUM } = require('./constants');
-const { players } = require('./data');
 const { MAX_NUM, JOKER } = require('./constants');
+const { players } = require('./data');
 
 const cards = [JOKER, JOKER];
 for (let i = 1; i <= MAX_NUM; ++i) {
@@ -57,5 +56,5 @@ module.exports = {
 	shuffle,
 	shuffleCards,
     isTurn,
-    isValidCard,
+    isInHands,
 };
