@@ -738,7 +738,7 @@ app.io.on("connection", (socket) => {
                   ]);
                   obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
-                  console.log(obj.nickname, obj.order);
+                  console.log(obj[player].nickname, obj[player].order);
                 } else if (
                   (obj[player].hand.length > 0 &&
                     !obj[player].pointsReceived &&
@@ -748,7 +748,7 @@ app.io.on("connection", (socket) => {
                   leaderBoard.push([0, obj[player].nickname, player]);
                   obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
-                  console.log(obj.nickname, obj.order);
+                  console.log(obj[player].nickname, obj[player].order);
                 } else {
                   leaderBoard.push([
                     obj[player].points,
@@ -757,7 +757,7 @@ app.io.on("connection", (socket) => {
                   ]);
                   obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
-                  console.log(obj.nickname, obj.order);
+                  console.log(obj[player].nickname, obj[player].order);
                 }
               }
               leaderBoard.sort((a, b) => b[0] - a[0]); // For descending sort
@@ -903,7 +903,7 @@ app.io.on("connection", (socket) => {
                   ]);
                   obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
-                  console.log(obj.nickname, obj.order);
+                  console.log(obj[player].nickname, obj[player].order);
                 } else if (
                   (obj[player].hand.length > 0 &&
                     !obj[player].pointsReceived) ||
@@ -912,7 +912,7 @@ app.io.on("connection", (socket) => {
                   leaderBoard.push([0, obj[player].nickname, player]);
                   obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
-                  console.log(obj.nickname, obj.order);
+                  console.log(obj[player].nickname, obj[player].order);
                 } else {
                   leaderBoard.push([
                     obj[player].points,
@@ -921,7 +921,7 @@ app.io.on("connection", (socket) => {
                   ]);
                   obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
-                  console.log(obj.nickname, obj.order);
+                  console.log(obj[player].nickname, obj[player].order);
                 }
               }
 
