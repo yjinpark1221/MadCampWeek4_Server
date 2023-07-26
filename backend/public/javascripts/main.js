@@ -515,7 +515,12 @@ $(function () {
     if (roomData.leaderBoard && roomData.game.state === game_state.WAITING) {
       if(Object.keys(roomData.sockets).length > roomData.leaderBoard.length) {
         for (const [sid, user] of Object.entries(roomData.sockets)) {
-          if (!roomData.leaderBoard.find((el) => el[2] === sid)) roomData.leaderBoard.push([0, user.nickname, sid, 'merchant'])
+          if (!roomData.leaderBoard.find((el) => el[2] === sid)) {
+            roomData.leaderBoard.push([0, user.nickname, sid, 'merchant'])
+            user.reset(roomData.leaderBoard.length());
+            console.log(leaderBoard);
+            console.log(user.nickname, user.order);
+          }
         }
       }
       roomData.leaderBoard.forEach((val, i) => {

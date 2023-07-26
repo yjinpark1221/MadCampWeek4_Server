@@ -723,35 +723,22 @@ app.io.on("connection", (socket) => {
                   !obj[player].pointsReceived &&
                   obj[player].ready
                 ) {
-                  if (!obj[player].points) {
-                    let points = 0;
-                    roomsInfo.rooms.open[room_name].game.order.forEach(
-                      (val) => {
-                        if (val === true) points++;
-                      }
-                    );
-                    obj[player].points = points;
-                    obj[player].pointsReceived = true;
-                    leaderBoard.push([
-                      obj[player].points,
-                      obj[player].nickname,
-                      player,
-                    ]);
-                  } else {
-                    let points = 0;
-                    roomsInfo.rooms.open[room_name].game.order.forEach(
-                      (val) => {
-                        if (val === true) points++;
-                      }
-                    );
-                    obj[player].points += points;
-                    obj[player].pointsReceived = true;
-                    leaderBoard.push([
-                      obj[player].points,
-                      obj[player].nickname,
-                      player,
-                    ]);
-                  }
+                  let points = 0;
+                  roomsInfo.rooms.open[room_name].game.order.forEach(
+                    (val) => {
+                      if (val === true) points++;
+                    }
+                  );
+                  obj[player].points = points;
+                  obj[player].pointsReceived = true;
+                  leaderBoard.push([
+                    obj[player].points,
+                    obj[player].nickname,
+                    player,
+                  ]);
+                  obj.reset(leaderBoard.length());
+                  console.log(leaderBoard);
+                  console.log(obj.nickname, obj.order);
                 } else if (
                   (obj[player].hand.length > 0 &&
                     !obj[player].pointsReceived &&
@@ -759,12 +746,18 @@ app.io.on("connection", (socket) => {
                   !obj[player].ready
                 ) {
                   leaderBoard.push([0, obj[player].nickname, player]);
+                  obj.reset(leaderBoard.length());
+                  console.log(leaderBoard);
+                  console.log(obj.nickname, obj.order);
                 } else {
                   leaderBoard.push([
                     obj[player].points,
                     obj[player].nickname,
                     player,
                   ]);
+                  obj.reset(leaderBoard.length());
+                  console.log(leaderBoard);
+                  console.log(obj.nickname, obj.order);
                 }
               }
               leaderBoard.sort((a, b) => b[0] - a[0]); // For descending sort
@@ -801,7 +794,7 @@ app.io.on("connection", (socket) => {
                 for (const [sid, userData] of Object.entries(
                     roomsInfo.rooms.open[room_name].sockets
                   )) {
-                  userData.reset();
+                  userData.reset(-1);
                 }
               }
             }
@@ -895,47 +888,40 @@ app.io.on("connection", (socket) => {
                   !obj[player].pointsReceived &&
                   obj[player].ready
                 ) {
-                  if (!obj[player].points) {
-                    let points = 0;
-                    roomsInfo.rooms.hide[room_name].game.order.forEach(
-                      (val) => {
-                        if (val === true) points++;
-                      }
-                    );
-                    obj[player].points = points;
-                    obj[player].pointsReceived = true;
-                    leaderBoard.push([
-                      obj[player].points,
-                      obj[player].nickname,
-                      player,
-                    ]);
-                  } else {
-                    let points = 0;
-                    roomsInfo.rooms.hide[room_name].game.order.forEach(
-                      (val) => {
-                        if (val === true) points++;
-                      }
-                    );
-                    obj[player].points += points;
-                    obj[player].pointsReceived = true;
-                    leaderBoard.push([
-                      obj[player].points,
-                      obj[player].nickname,
-                      player,
-                    ]);
-                  }
+                  let points = 0;
+                  roomsInfo.rooms.hide[room_name].game.order.forEach(
+                    (val) => {
+                      if (val === true) points++;
+                    }
+                  );
+                  obj[player].points = points;
+                  obj[player].pointsReceived = true;
+                  leaderBoard.push([
+                    obj[player].points,
+                    obj[player].nickname,
+                    player,
+                  ]);
+                  obj.reset(leaderBoard.length());
+                  console.log(leaderBoard);
+                  console.log(obj.nickname, obj.order);
                 } else if (
                   (obj[player].hand.length > 0 &&
                     !obj[player].pointsReceived) ||
                   !obj[player].ready
                 ) {
                   leaderBoard.push([0, obj[player].nickname, player]);
+                  obj.reset(leaderBoard.length());
+                  console.log(leaderBoard);
+                  console.log(obj.nickname, obj.order);
                 } else {
                   leaderBoard.push([
                     obj[player].points,
                     obj[player].nickname,
                     player,
                   ]);
+                  obj.reset(leaderBoard.length());
+                  console.log(leaderBoard);
+                  console.log(obj.nickname, obj.order);
                 }
               }
 
@@ -974,7 +960,7 @@ app.io.on("connection", (socket) => {
                 for (const [sid, userData] of Object.entries(
                     roomsInfo.rooms.hide[room_name].sockets
                   )) {
-                  userData.reset();
+                  userData.reset(-1);
                 }
               }
             }
@@ -1094,7 +1080,7 @@ function updateRoomDisconnect(socket, room_name, roomsObj) {
         for (const [sid, userData] of Object.entries(
             roomsObj[room_name].sockets
           )) {
-          userData.reset();
+          userData.reset(-1);
         }
       }
 
@@ -1115,7 +1101,7 @@ function updateRoomDisconnect(socket, room_name, roomsObj) {
   }
 
   // update/reset user
-  socket.userData.reset();
+  socket.userData.reset(-1);
   socket.userData.leaveRoom();
 
   app.io.to(room_name).emit("refresh game room", roomsObj[room_name]);
