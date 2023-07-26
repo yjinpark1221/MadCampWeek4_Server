@@ -211,8 +211,7 @@ $(function () {
     if (!$("#play-btn").hasClass("disabled")) {
       // Confirm alert if passing with no card on field
       if($("#play-btn").text() === language.pass && $('#field-section').children().length === 0) {
-        let confirmPass = confirm(language.confirmPass);
-        if(confirmPass) socket.emit("play", selected_card);
+        socket.emit("play", selected_card);
       } else socket.emit("play", selected_card);
     }
   });

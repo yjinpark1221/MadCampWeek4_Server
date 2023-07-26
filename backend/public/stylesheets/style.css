@@ -307,27 +307,6 @@ a {
   border-radius: 8px !important;
 }
 
-.card6 {
-  background: url(./image/6.png);
-  background-size: cover;
-  height: 176px !important;
-  width: 124px !important;
-}
-
-.card4 {
-  background: url(./image/4.png);
-  background-size: cover;
-  height: 176px !important;
-  width: 124px !important;
-}
-
-.jolly {
-  background: url(./image/13.png);
-  background-size: cover;
-  height: 176px !important;
-  width: 124px !important;
-}
-
 .card1 {
   background: url(./image/1.png);
   background-size: cover;
@@ -349,8 +328,22 @@ a {
   width: 124px !important;
 }
 
-.card8 {
-  background: url(./image/8.png);
+.card4 {
+  background: url(./image/4.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
+}
+
+.card5 {
+  background: url(./image/5.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
+}
+
+.card6 {
+  background: url(./image/6.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
@@ -363,8 +356,8 @@ a {
   width: 124px !important;
 }
 
-.card5 {
-  background: url(./image/5.png);
+.card8 {
+  background: url(./image/8.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
@@ -393,6 +386,13 @@ a {
 
 .card12 {
   background: url(./image/12.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
+}
+
+.card13 {
+  background: url(./image/13.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
