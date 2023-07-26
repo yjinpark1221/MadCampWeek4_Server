@@ -264,7 +264,7 @@ app.io.on("connection", (socket) => {
       gameData.taxSkip = true;
 
       const isBigRevolution =
-        roomsInfo.rooms.open[roomName].sockets[sid].order == inGamePlayerCnt - 1;
+        roomsInfo.rooms.open[roomName].sockets[sid].seat == inGamePlayerCnt - 1;
 
       app.io.to(room_name).emit(
         "chat announce",
