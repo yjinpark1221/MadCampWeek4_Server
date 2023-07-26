@@ -9,11 +9,14 @@ class Player {
     this.seat = -1; // = order
     this.ready = false;
     this.hand = [];
+    this.order = -1;
   }
 
-  reset() {
+  // reset() {
+  reset(i) {
     this.hand = [];
     this.ready = false;
+    this.order = i;
   }
 
   leaveRoom() {
