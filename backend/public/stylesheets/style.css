@@ -307,14 +307,14 @@ a {
   border-radius: 8px !important;
 }
 
-.knight {
+.card6 {
   background: url(./image/6.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.baroness {
+.card4 {
   background: url(./image/4.png);
   background-size: cover;
   height: 176px !important;
@@ -328,70 +328,70 @@ a {
   width: 124px !important;
 }
 
-.dalmuti {
+.card1 {
   background: url(./image/1.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.archbishop {
+.card2 {
   background: url(./image/2.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.marshal {
+.card3 {
   background: url(./image/3.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.mason {
+.card8 {
   background: url(./image/8.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.seamstress {
+.card7 {
   background: url(./image/7.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.abbess {
+.card5 {
   background: url(./image/5.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.cook {
+.card9 {
   background: url(./image/9.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.shepherdess {
+.card10 {
   background: url(./image/10.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.stonecutter {
+.card11 {
   background: url(./image/11.png);
   background-size: cover;
   height: 176px !important;
   width: 124px !important;
 }
 
-.peasant {
+.card12 {
   background: url(./image/12.png);
   background-size: cover;
   height: 176px !important;

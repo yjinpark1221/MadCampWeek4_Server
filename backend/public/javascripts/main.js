@@ -651,19 +651,19 @@ $(function () {
 
   //! CARDS STYLE
   var card_colors = [
-    "dalmuti",
-    "archbishop",
-    "marshal",
-    "baroness",
-    "abbess",
-    "knight",
-    "seamstress",
-    "mason",
-    "cook",
-    "shepherdess",
-    "stonecutter",
-    "peasant",
-    "jolly",
+    "card1",
+    "card2",
+    "card3",
+    "card4",
+    "card5",
+    "card6",
+    "card7",
+    "card8",
+    "card9",
+    "card10",
+    "card11",
+    "card12",
+    "card13",
   ];
   var selected_card = {};
 
