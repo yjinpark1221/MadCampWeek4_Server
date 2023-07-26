@@ -189,6 +189,7 @@ $(function () {
   // button, must be checked on server side
   $("#ready-btn").on("click", () => {
     if (!$("#ready-btn").hasClass("disabled")) {
+      console.log("client: main.js 192 line");
       socket.emit("ready");
 
       if ($("#ready-btn").text() === language.notReady) {
