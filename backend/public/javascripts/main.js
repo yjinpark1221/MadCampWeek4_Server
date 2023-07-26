@@ -662,8 +662,10 @@ $(function () {
     selected_card = {};
     $("#play-btn")
       .text(language.pass)
-      .addClass("bg-alert1")
-      .removeClass("btn-success");
+      .addClass('btn-danger')
+      .removeClass('btn-success');
+      // .addClass("bg-alert1")
+      // .removeClass("btn-success");
 
     // card -1
     // its roomData not user
@@ -720,13 +722,17 @@ $(function () {
               if (Object.keys(selected_card).length == 0) {
                 $("#play-btn")
                   .text(language.pass)
-                  .addClass("bg-alert1")
-                  .removeClass("bg-success1");
+                  .removeClass('btn-success')
+                  .addClass('btn-danger');
+                  // .addClass("bg-alert1")
+                  // .removeClass("bg-success1");
               } else {
                 $("#play-btn")
                   .text(language.play)
-                  .removeClass("bg-alert1")
-                  .addClass("bg-success1");
+                  .removeClass('btn-danger')
+                  .addClass('btn-success');
+                  // .removeClass("bg-alert1")
+                  // .addClass("bg-success1");
               }
             });
 
