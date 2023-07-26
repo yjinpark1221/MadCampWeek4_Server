@@ -12,7 +12,6 @@ class Player {
     this.order = -1;
   }
 
-  // reset() {
   reset(i) {
     this.hand = [];
     this.ready = false;
@@ -45,6 +44,17 @@ class Game {
   }
 
   start(roomData) {
+
+    for (let i = 0; i < 8; ++i) {
+      if (i > roomData.leaderBoard.length) {
+        roomData.seats[i] = false;
+        continue;
+      }
+      roomData.seats[i] = true;
+      roomData.sockets[i].seat = roomData.sockets[i].order - 1;
+    }
+
+
     this.state = game_state.PLAYING;
     this.round++;
 
