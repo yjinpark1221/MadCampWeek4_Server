@@ -517,7 +517,7 @@ $(function () {
         for (const [sid, user] of Object.entries(roomData.sockets)) {
           if (!roomData.leaderBoard.find((el) => el[2] === sid)) {
             roomData.leaderBoard.push([0, user.nickname, sid, 'merchant'])
-            user.reset(roomData.leaderBoard.length());
+            user.reset(roomData.leaderBoard.length);
             console.log(leaderBoard);
             console.log(user.nickname, user.order);
           }

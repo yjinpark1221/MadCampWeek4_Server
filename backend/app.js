@@ -736,7 +736,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj.reset(leaderBoard.length());
+                  obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj.nickname, obj.order);
                 } else if (
@@ -746,7 +746,7 @@ app.io.on("connection", (socket) => {
                   !obj[player].ready
                 ) {
                   leaderBoard.push([0, obj[player].nickname, player]);
-                  obj.reset(leaderBoard.length());
+                  obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj.nickname, obj.order);
                 } else {
@@ -755,7 +755,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj.reset(leaderBoard.length());
+                  obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj.nickname, obj.order);
                 }
@@ -901,7 +901,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj.reset(leaderBoard.length());
+                  obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj.nickname, obj.order);
                 } else if (
@@ -910,7 +910,7 @@ app.io.on("connection", (socket) => {
                   !obj[player].ready
                 ) {
                   leaderBoard.push([0, obj[player].nickname, player]);
-                  obj.reset(leaderBoard.length());
+                  obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj.nickname, obj.order);
                 } else {
@@ -919,7 +919,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj.reset(leaderBoard.length());
+                  obj[player].reset(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj.nickname, obj.order);
                 }
