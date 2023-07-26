@@ -262,12 +262,24 @@ app.io.on("connection", (socket) => {
     for(const [sid, isRevolution] of gameData.revolutionList) {
       if(!isRevolution) continue;
       gameData.taxSkip = true;
+
+      const isBigRevolution =
+        roomsInfo.rooms.open[roomName].sockets[sid].order == inGamePlayerCnt - 1;
+
+      app.io.to(room_name).emit(
+        "chat announce",
+        isBigRevolution ? "language.revolutionOccur" : "language.revolutionOccur",
+        "blue",
+        roomsInfo.rooms.open[room_name].sockets[sid].nickname
+      );
+
       // 대혁명
-      // 중간에 빈 자리가 있다면? 중간에 spectator가 들어왔다면? -> 나중에 생각
-      // for(let [sid, userData] of Object.entries(roomsInfo.rooms.open[roomName].sockets)) {
-      //   roomData.sockets[sid].seat = inGamePlayerCnt - roomData.sockets[sid].seat - 1;
-      //   // userData.seat = inGamePlayerCnt - userData.seat - 1;
-      // }
+      if(isBigRevolution) {
+      for(let [sid, userData] of Object.entries(roomsInfo.rooms.open[roomName].sockets)) {
+        roomData.sockets[sid].seat = inGamePlayerCnt - roomData.sockets[sid].seat - 1;
+        // userData.seat = inGamePlayerCnt - userData.seat - 1;
+      }
+      }
     }
     gameData.state = game_state.PLAYING;
 
@@ -276,6 +288,12 @@ app.io.on("connection", (socket) => {
     console.log(`tax step: isSkip: ${gameData.taxSkip}`);
 
     if(gameData.taxSkip) {
+      app.io.to(room_name).emit(
+        "chat announce",
+        "language.taxSkip",
+        "blue",
+      );
+
       app.io.to("waiting room").emit(
         "refresh waiting room",
         socket.userData,
@@ -288,7 +306,6 @@ app.io.on("connection", (socket) => {
       );
       app.io.to(room_name).emit("game real start", "revolution & tax stage end");
 
-      // TODO: 세금 면제 메시지 전송
       return;
     }
 

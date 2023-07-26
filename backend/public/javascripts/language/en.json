@@ -1,14 +1,14 @@
-{ 
-    "title": "몰무티요(가제)", 
+{
+    "title": "몰무티요(가제)",
     "create": "방 만들기",
     "join": "참여하기",
-    "newRoomName": "방 이름을 적어주세요:", 
+    "newRoomName": "방 이름을 적어주세요:",
     "hide": "비공개 방",
     "btnCreate": "방 만들기",
-    "titleNickModal": "게임 플레이 프로필 수정하기", 
+    "titleNickModal": "게임 플레이 프로필 수정하기",
     "setNickname": "닉네임을 입력해주세요:",
     "save": "저장하기",
-    "btnJoin": "참여하기", 
+    "btnJoin": "참여하기",
     "info": "Information",
     "howToPlay": "How to play?",
     "room": "개의 참여할 수 있는 방이 있습니다.",
@@ -47,5 +47,8 @@
     "placed": "(이)가 낸 카드",
     "taxs": ["품위유지비를 납부함:", "월급을 받음:"],
     "leaderboard": "순위표",
-    "confirmPass": "패스하실 것인가요?"
+    "confirmPass": "패스하실 것인가요?",
+    "revolutionOccur": "혁명이 일어났습니다!",
+    "bigRevolutionOccur": "대혁명이 일어났습니다!",
+    "taxSkip": "품위유지비가 면제됩니다!"
 }
