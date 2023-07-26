@@ -165,6 +165,7 @@ app.io.on("connection", (socket) => {
       if (socket.userData.ready === true) {
         socket.userData.ready = false;
         roomsInfo.rooms.open[room_name].game.readyCount--;
+        console.log("server: app.js 168 line");
         syncUserToRoom(socket, roomsInfo.rooms.open);
 
         app.io.to(room_name).emit(
@@ -312,7 +313,7 @@ app.io.on("connection", (socket) => {
                 `${firstTwo[0]} & ${firstTwo[1]}`
               );
 
-              io.to(leaderB[leaderB.length - 1][2]).emit(
+              app.io.to(leaderB[leaderB.length - 1][2]).emit(
                 "chat announce taxs",
                 "language.taxs",
                 "red",
@@ -676,12 +677,12 @@ app.io.on("connection", (socket) => {
           let testLastPass =
             roomsInfo.rooms.open[room_name].game.nextPlayer(selected_card);
 
-          // io.to(room_name).emit(
-          //   "chat announce",
-          //   "language.passed",
-          //   "black",
-          //   socket.userData.nickname
-          // );
+          app.io.to(room_name).emit(
+            "chat announce",
+            "language.passed",
+            "black",
+            socket.userData.nickname
+          );
 
           app.io.to(room_name).emit(
             "refresh game room",
@@ -848,12 +849,12 @@ app.io.on("connection", (socket) => {
           let testLastPass =
             roomsInfo.rooms.hide[room_name].game.nextPlayer(selected_card);
 
-          // io.to(room_name).emit(
-          //   "chat announce",
-          //   `language.passed`,
-          //   "black",
-          //   socket.userData.nickname
-          // );
+          app.io.to(room_name).emit(
+            "chat announce",
+            `language.passed`,
+            "black",
+            socket.userData.nickname
+          );
 
           app.io.to(room_name).emit(
             "refresh game room",
@@ -1051,10 +1052,12 @@ app.io.on("connection", (socket) => {
 // ADD USER TO ROOM IN SERVER
 function syncUserToRoom(socket, roomObj) {
   // Check if user isn't in waiting rooom and already in the room
+  console.log("server: app.js syncUserToRoom 1055");
   if (
     socket.userData.cur_room != "waiting room" &&
     roomObj[socket.userData.cur_room]
   ) {
+    console.log("server: app.js syncUserToRoom if in");
     if (!roomObj[socket.userData.cur_room].sockets) {
       roomObj[socket.userData.cur_room].sockets = {};
       roomObj[socket.userData.cur_room].sockets[socket.id] = socket.userData;
@@ -1062,6 +1065,7 @@ function syncUserToRoom(socket, roomObj) {
       roomObj[socket.userData.cur_room].sockets[socket.id] = socket.userData;
     }
   }
+  console.log("server: app.js syncUserToRoom 1068");
   // Add user to room in server
 }
 
