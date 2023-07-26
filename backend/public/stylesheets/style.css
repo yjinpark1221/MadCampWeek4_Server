@@ -36,13 +36,9 @@ a {
   }
 }
 
-
 body {
   height: 100vh;
-}
-
-body {
-  background-color: var(--secondary2) !important;
+  background-color: #FAF3F0 !important;
 }
 
 .modal {
@@ -50,13 +46,15 @@ body {
 }
 
 .game-room {
-  background-color: azure;
+  color: white;
+  /* background-color: azure; */
+  background-color: #FAF3F0;
   cursor: pointer;
 }
 
 .playerSlot {
   height: 160px;
-  background-color: var(--secondary1);
+  /* background-color: var(--primary1); */
   font-size: larger;
   font-weight: bold;
   z-index: -3;
@@ -199,6 +197,10 @@ a {
   padding-right: 0px !important;
 }
 
+.bg-room {
+  background-color: #FAF3F0 !important;
+}
+
 .bg-success1 {
   background-color: var(--success1) !important;
 }
@@ -225,7 +227,7 @@ a {
   background-color: var(--secondary1);
 }
 .bg-secondary1:hover {
-  background-color: #ecd4ad;
+  background-color: var(--secondary2);
 }
 
 .bg-secondary2 {
@@ -247,17 +249,18 @@ a {
 }
 
 :root {
-  --success1: #81b29a;
-  --success2: #aeebcd;
-  --alert1: #e07a5f;
-  --alert2: #df907a;
-  --alert3: #e9a491;
-  --primary1: #3d405b;
-  --primary2: #6d708a;
-  --primary3: #a2a6c5;
-  --secondary2: #f4f1de;
-  --secondary1: #f2cc8f;
+  --success1: #7E7AA4; /* Purple */
+  --success2: #5C597E; /* Dark Purple */
+  --alert1: #D8816A; /* Salmon */
+  --alert2: #D8563A; /* Dark Salmon */
+  --alert3: #D82A1A; /* Bright Salmon */
+  --primary1: #282747; /* Dark Purple-Gray */
+  --primary2: #58546F; /* Medium Purple-Gray */
+  --primary3: #9D9BAE; /* Light Purple-Gray */
+  --secondary2: #F7F6F2; /* Light Cream */
+  --secondary1: #FCC790; /* Peach */
 }
+
 .flip-card-inner {
   position: relative;
   width: 100%;
@@ -487,7 +490,7 @@ a {
   }
 
   .playerSlot {
-    background-color: var(--secondary1);
+    background-color: var(--primary1);
     font-size: larger;
     border: 3px solid var(--light);
     font-weight: bold;

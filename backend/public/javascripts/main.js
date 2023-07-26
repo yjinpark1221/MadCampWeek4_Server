@@ -191,9 +191,18 @@ $(function () {
     if (!$("#ready-btn").hasClass("disabled")) {
       socket.emit("ready");
 
-      if ($("#ready-btn").text() === language.notReady)
+      if ($("#ready-btn").text() === language.notReady) {
         $("#ready-btn").text(language.ready);
-      else $("#ready-btn").text(language.notReady);
+        $("#ready-btn")
+          .removeClass("btn-warning")
+          .addClass("btn-success");
+      }
+      else {
+        $("#ready-btn").text(language.notReady);
+        $("#ready-btn")
+          .removeClass("btn-success")
+          .addClass("btn-warning");
+      }    
     }
   });
 
@@ -291,7 +300,7 @@ $(function () {
     else if (state == game_state.PLAYING) str = language.playing;
 
     let $newRoom = $(
-      `<div class='p-4 w-100 mt-2 game-room rounded bg-secondary1'><strong>${language.roomTitle}</strong> ${name} <strong>${language.players}</strong> ${length} / 8 <strong>- ${str}</strong></div>`
+      `<div class='p-4 w-100 mt-2 game-room rounded bg-primary2'><strong>${language.roomTitle}</strong> ${name} <strong>${language.players}</strong> ${length} / 8 <strong>- ${str}</strong></div>`
     );
 
     // join room
@@ -524,7 +533,7 @@ $(function () {
           if (roomData.sockets[val[2]].ready) {
             $("#player" + i).append(
               $(
-                "<div class='fontMediaSlots' style='color:var(--success1);'>" +
+                "<div class='fontMediaSlots' style='color:var(--success);'>" +
                   language.ready +
                   "</div>"
               )
@@ -532,7 +541,7 @@ $(function () {
           } else {
             $("#player" + i).append(
               $(
-                "<div class='fontMediaSlots' style='color:var(--alert1);'>" +
+                "<div class='fontMediaSlots' style='color:var(--danger);'>" +
                   language.notReady +
                   "</div>"
               )
@@ -543,7 +552,7 @@ $(function () {
             if (roomData.sockets[val[2]].hand.length == 0)
               $("#player" + i).append(
                 $(
-                  "<div class='fontMediaSlots' style='color:var(--success1);'>" +
+                  "<div class='fontMediaSlots' style='color:var(--success);'>" +
                     language.winner +
                     "</div>"
                 )
@@ -591,7 +600,7 @@ $(function () {
           if (user.ready) {
             $("#player" + user.seat).append(
               $(
-                "<div class='fontMediaSlots' style='color:var(--success1);'>" +
+                "<div class='fontMediaSlots' style='color:var(--success);'>" +
                   language.ready +
                   "</div>"
               )
@@ -599,7 +608,7 @@ $(function () {
           } else {
             $("#player" + user.seat).append(
               $(
-                "<div class='fontMediaSlots' style='color:var(--alert1);'>" +
+                "<div class='fontMediaSlots' style='color:var(--danger);'>" +
                   language.notReady +
                   "</div>"
               )
@@ -610,7 +619,7 @@ $(function () {
             if (user.hand.length == 0)
               $("#player" + user.seat).append(
                 $(
-                  "<div class='fontMediaSlots' style='color:var(--success1);'>" +
+                  "<div class='fontMediaSlots' style='color:var(--success);'>" +
                     language.winner +
                     "</div>"
                 )
@@ -664,8 +673,6 @@ $(function () {
       .text(language.pass)
       .addClass('btn-danger')
       .removeClass('btn-success');
-      // .addClass("bg-alert1")
-      // .removeClass("btn-success");
 
     // card -1
     // its roomData not user
@@ -724,15 +731,11 @@ $(function () {
                   .text(language.pass)
                   .removeClass('btn-success')
                   .addClass('btn-danger');
-                  // .addClass("bg-alert1")
-                  // .removeClass("bg-success1");
               } else {
                 $("#play-btn")
                   .text(language.play)
                   .removeClass('btn-danger')
                   .addClass('btn-success');
-                  // .removeClass("bg-alert1")
-                  // .addClass("bg-success1");
               }
             });
 
