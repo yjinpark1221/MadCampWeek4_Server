@@ -12,9 +12,12 @@ class Player {
     this.order = -1;
   }
 
-  reset(i) {
+  reset() {
     this.hand = [];
     this.ready = false;
+  }
+
+  setOrder(i) {
     this.order = i;
   }
 
@@ -44,14 +47,15 @@ class Game {
   }
 
   start(roomData) {
-
+    let obj = roomData.sockets;
     for (let i = 0; i < 8; ++i) {
-      if (i > roomData.leaderBoard.length) {
-        roomData.seats[i] = false;
-        continue;
-      }
-      roomData.seats[i] = true;
-      roomData.sockets[i].seat = roomData.sockets[i].order - 1;
+      roomData.seats[i] = (i < Object.keys(obj).length);
+    }
+    let cnt = 0;
+    for (const sid in obj) {
+      console.log(`gameconfig.js: ${JSON.stringify(roomData)}`);
+      roomData.sockets[sid].seat = roomData.sockets[sid].order;
+      if(roomData.sockets[sid].seat < 0)  roomData.sockets[sid].seat = cnt++;
     }
 
 
