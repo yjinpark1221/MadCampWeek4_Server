@@ -53,7 +53,7 @@ body {
 }
 
 .playerSlot {
-  height: 160px;
+  height: 176px;
   /* background-color: var(--primary1); */
   font-size: larger;
   font-weight: bold;
@@ -299,121 +299,103 @@ a {
 
 .backCard {
   background: url(/icons/img-cover.jpg) no-repeat;
-  height: 160px !important;
+  height: 176px !important;
   background-size: 110px;
   background-position-x: 50%;
   background-position-y: 50%;
-  width: 102px !important;
+  width: 124px !important;
   border-radius: 8px !important;
 }
 
 .knight {
-  background: url(/icons/img-cards.jpg) no-repeat 50%;
-  height: 160px !important;
-  background-size: 500px;
-  width: 102px !important;
+  background: url(./image/6.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .baroness {
-  background: url(/icons/img-cards.jpg) no-repeat 0%;
-  height: 160px !important;
-  background-size: 500px;
-  width: 102px !important;
+  background: url(./image/4.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .jolly {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 0%;
-  width: 102px !important;
+  background: url(./image/13.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .dalmuti {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 50%;
-  width: 102px !important;
+  background: url(./image/1.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .archbishop {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 75%;
-  width: 102px !important;
+  background: url(./image/2.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .marshal {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 100.1%;
-  width: 102px !important;
+  background: url(./image/3.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .mason {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 100.1%;
-  background-position-y: 50%;
-  width: 102px !important;
+  background: url(./image/8.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .seamstress {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 75%;
-  background-position-y: 50%;
-  width: 102px !important;
+  background: url(./image/7.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .abbess {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 25%;
-  background-position-y: 50%;
-  width: 102px !important;
+  background: url(./image/5.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .cook {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 0;
-  background-position-y: 100%;
-  width: 102px !important;
+  background: url(./image/9.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .shepherdess {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 25%;
-  background-position-y: 100%;
-  width: 102px !important;
+  background: url(./image/10.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .stonecutter {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 50%;
-  background-position-y: 100%;
-  width: 102px !important;
+  background: url(./image/11.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .peasant {
-  background: url(/icons/img-cards.jpg) no-repeat;
-  height: 160px !important;
-  background-size: 500px;
-  background-position-x: 75.4%;
-  background-position-y: 100%;
-  width: 102px !important;
+  background: url(./image/12.png);
+  background-size: cover;
+  height: 176px !important;
+  width: 124px !important;
 }
 
 .fontMediaSlots {
@@ -525,7 +507,7 @@ a {
     border-radius: 50px;
     text-align: center;
     box-shadow: 2px 2px 3px #999;
-    z-index: 102;
+    z-index: 124;
   }
 
   .my-float {
