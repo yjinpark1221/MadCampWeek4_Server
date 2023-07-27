@@ -218,6 +218,11 @@ $(function () {
     }
   });
 
+  $("#reload-btn").on("click", () => {
+      // Confirm alert if passing with no card on field
+      $('.handCard').removeClass("selected")
+  });
+  
   // UPDATE WAITING ROOMS LIST IN MAIN
   socket.on("refresh waiting room", (user, rooms, user_count) => {
     let roomCount = 0;

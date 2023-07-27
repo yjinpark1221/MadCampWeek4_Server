@@ -87,10 +87,7 @@ class Game {
       else this.cur_order[i] = -1;
     }
 
-    this.cur_order_idx = Math.floor(Math.random() * 8);
-
-    while (this.cur_order[this.cur_order_idx] < 1)
-      this.cur_order_idx = Math.floor(Math.random() * 8); // cursor
+    this.cur_order_idx = 0;
 
     // shuffle deck
     this.deck = this.shuffle(this.deck);
