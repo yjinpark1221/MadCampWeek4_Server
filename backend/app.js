@@ -69,7 +69,7 @@ app.use(function(err, req, res, next) {
 });
 
 app.io = require('socket.io')();
- 
+
 app.io.on("connection", (socket) => {
   user_count++;
   socket.userData = new Player("Guest" + connectNumber, "main room");
@@ -161,350 +161,163 @@ app.io.on("connection", (socket) => {
   socket.on("ready", () => {
     let room_name = socket.userData.cur_room;
 
-    if (roomsInfo.rooms.open.hasOwnProperty(room_name)) {
-      if (socket.userData.ready === true) {
-        socket.userData.ready = false;
-        roomsInfo.rooms.open[room_name].game.readyCount--;
-        console.log("server: app.js 168 line");
-        syncUserToRoom(socket, roomsInfo.rooms.open);
+    if(!roomsInfo.rooms.open.hasOwnProperty(room_name)) return;
+    if (socket.userData.ready === true) {
+      socket.userData.ready = false;
+      roomsInfo.rooms.open[room_name].game.readyCount -= 1;
+      syncUserToRoom(socket, roomsInfo.rooms.open);
 
-        app.io.to(room_name).emit(
-          "refresh game room",
-          roomsInfo.rooms.open[room_name]
-        );
-        return;
-      }
+      app.io.to(room_name).emit(
+        "refresh game room",
+        roomsInfo.rooms.open[room_name]
+      );
+      return;
+    }
 
-      // Ready only on Waiting room
+    // Ready only on Waiting room
+    if (
+      roomsInfo.rooms.open[room_name].game.state == game_state.WAITING &&
+      socket.userData.ready === false
+    ) {
+      socket.userData.ready = true;
+      roomsInfo.rooms.open[room_name].game.readyCount += 1;
+      syncUserToRoom(socket, roomsInfo.rooms.open);
+
+      // send out updated data
+      app.io.to(room_name).emit(
+        "refresh game room",
+        roomsInfo.rooms.open[room_name]
+      );
+
+      // CHECK TO START GAME
+      // Shared data, so use roomData not userData
+      const userCnt = Object.keys(roomsInfo.rooms.open[room_name].sockets).length;
       if (
-        roomsInfo.rooms.open[room_name].game.state == game_state.WAITING &&
-        !socket.userData.ready
+        userCnt >= 2 &&
+        userCnt == roomsInfo.rooms.open[room_name].game.readyCount
       ) {
-        socket.userData.ready = true;
-        roomsInfo.rooms.open[room_name].game.readyCount++;
-        syncUserToRoom(socket, roomsInfo.rooms.open);
+        //start game
+        console.log("NEW:", room_name + ": game started");
+        app.io.to(room_name).emit("chat announce", "language.started", "blue");
 
-        // send out updated data
-        app.io.to(room_name).emit(
-          "refresh game room",
+        // set order, shuffle, etc.
+        roomsInfo.rooms.open[room_name].game.start(
           roomsInfo.rooms.open[room_name]
         );
 
-        // CHECK TO START GAME
-        // Shared data, so use roomData not userData
-        if (
-          Object.keys(roomsInfo.rooms.open[room_name].sockets).length >= 2 &&
-          roomsInfo.rooms.open[room_name].game.readyCount ==
-          Object.keys(roomsInfo.rooms.open[room_name].sockets).length
-        ) {
-          //start game
-          console.log("NEW:", room_name + ": game started");
-          app.io.to(room_name).emit("chat announce", "language.started", "blue");
-          app.io.to(room_name).emit("game start", "check revolution");
-
-          // set order, shuffle, etc.
-          roomsInfo.rooms.open[room_name].game.start(
-            roomsInfo.rooms.open[room_name]
-          );
-
-          // distribute
-          let handlim = Math.floor(
-            80 / Object.keys(roomsInfo.rooms.open[room_name].sockets).length
-          );
-          let cnt = 0;
-          for (const [sid, user] of Object.entries(
-              roomsInfo.rooms.open[room_name].sockets
-            )) {
-            for (let i = cnt * handlim; i < handlim * cnt + handlim; i++) {
-              user.hand.push(roomsInfo.rooms.open[room_name].game.deck[i]); // userData and room user Data not in sync
-              user.pointsReceived = false; // Reset points condition
-            }
-            cnt++;
+        // distribute
+        // TODO: 나머지 없게 만들기
+        let handlim = Math.floor(
+          80 / Object.keys(roomsInfo.rooms.open[room_name].sockets).length
+        );
+        let cnt = 0;
+        for (const [sid, user] of Object.entries(roomsInfo.rooms.open[room_name].sockets)) {
+          for (let i = cnt * handlim; i < handlim * cnt + handlim; i++) {
+            user.hand.push(roomsInfo.rooms.open[room_name].game.deck[i]); // userData and room user Data not in sync
+            user.pointsReceived = false; // Reset points condition
           }
-
-          // // SWAP CARDS TAXS
-          // if (roomsInfo.rooms.open[room_name].leaderBoard) {
-          //   let leaderB = roomsInfo.rooms.open[room_name].leaderBoard;
-          //   if (
-          //     leaderB[0][3] === "greaterDalmuti" &&
-          //     leaderB[leaderB.length - 1][3] === "greaterPeon"
-          //   ) {
-          //     // SORT FIRST
-          //     roomsInfo.rooms.open[room_name].sockets[leaderB[0][2]].hand.sort(
-          //       function (a, b) {
-          //         return a - b;
-          //       }
-          //     );
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[leaderB.length - 1][2]
-          //     ].hand.sort(function (a, b) {
-          //       return a - b;
-          //     });
-
-          //     // TAKE CARTS
-          //     let lastTwo =
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[0][2]
-          //       ].hand.splice(-2);
-          //     let isJolly = lastTwo.findIndex((val) => {
-          //       return val === 13;
-          //     });
-          //     if (isJolly !== -1) {
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[0][2]
-          //       ].hand.unshift(lastTwo.splice(isJolly, 1));
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[0][2]
-          //       ].hand.push(lastTwo[0]);
-          //       lastTwo =
-          //         roomsInfo.rooms.open[room_name].sockets[
-          //           leaderB[0][2]
-          //         ].hand.splice(-2);
-          //     }
-          //     isJolly = lastTwo.findIndex((val) => {
-          //       return val === 13;
-          //     });
-          //     if (isJolly !== -1) {
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[0][2]
-          //       ].hand.unshift(lastTwo.splice(isJolly, 1));
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[0][2]
-          //       ].hand.push(lastTwo[0]);
-          //       lastTwo =
-          //         roomsInfo.rooms.open[room_name].sockets[
-          //           leaderB[0][2]
-          //         ].hand.splice(-2);
-          //     }
-          //     let firstTwo = roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[leaderB.length - 1][2]
-          //     ].hand.splice(0, 2);
-
-          //     // SWAP CARDS
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[leaderB.length - 1][2]
-          //     ].hand.push(lastTwo[1]);
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[leaderB.length - 1][2]
-          //     ].hand.push(lastTwo[0]);
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[0][2]
-          //     ].hand.unshift(firstTwo[1]);
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[0][2]
-          //     ].hand.unshift(firstTwo[0]);
-
-          //     // MESSAGE TO EVERYONE
-          //     app.io.to(room_name).emit(
-          //       "chat announce",
-          //       "language.swap",
-          //       "blue",
-          //       roomsInfo.rooms.open[room_name].sockets[leaderB[0][2]].nickname,
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[leaderB.length - 1][2]
-          //       ].nickname
-          //     );
-
-          //     // MESSAGE TO USERS
-          //     app.io.to(leaderB[0][2]).emit(
-          //       "chat announce taxs",
-          //       "language.taxs",
-          //       "green",
-          //       `${lastTwo[0]} & ${lastTwo[1]}`,
-          //       `${firstTwo[0]} & ${firstTwo[1]}`
-          //     );
-
-          //     app.io.to(leaderB[leaderB.length - 1][2]).emit(
-          //       "chat announce taxs",
-          //       "language.taxs",
-          //       "red",
-          //       `${firstTwo[0]} & ${firstTwo[1]}`,
-          //       `${lastTwo[0]} & ${lastTwo[1]}`
-          //     );
-          //   }
-          //   if (
-          //     leaderB[1][3] === "lesserDalmuti" &&
-          //     leaderB[leaderB.length - 2][3] === "lesserPeon"
-          //   ) {
-          //     // SORT FIRST
-          //     roomsInfo.rooms.open[room_name].sockets[leaderB[1][2]].hand.sort(
-          //       function (a, b) {
-          //         return a - b;
-          //       }
-          //     );
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[leaderB.length - 2][2]
-          //     ].hand.sort(function (a, b) {
-          //       return a - b;
-          //     });
-
-          //     // TAKE CARTS
-          //     let lastOne =
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[1][2]
-          //       ].hand.splice(-1);
-          //     let isJolly = lastOne.findIndex((val) => {
-          //       return val === 13;
-          //     });
-          //     if (isJolly !== -1) {
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[1][2]
-          //       ].hand.unshift(lastOne.splice(isJolly, 1));
-          //       lastOne =
-          //         roomsInfo.rooms.open[room_name].sockets[
-          //           leaderB[1][2]
-          //         ].hand.splice(-1);
-          //     }
-          //     let firstOne = roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[leaderB.length - 2][2]
-          //     ].hand.splice(0, 1);
-
-          //     // SWAP CARDS
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[leaderB.length - 2][2]
-          //     ].hand.push(lastOne[0]);
-          //     roomsInfo.rooms.open[room_name].sockets[
-          //       leaderB[1][2]
-          //     ].hand.unshift(firstOne[0]);
-
-          //     // MESSAGE TO EVERYONE
-          //     app.io.to(room_name).emit(
-          //       "chat announce",
-          //       "language.swap",
-          //       "blue",
-          //       roomsInfo.rooms.open[room_name].sockets[leaderB[1][2]].nickname,
-          //       roomsInfo.rooms.open[room_name].sockets[
-          //         leaderB[leaderB.length - 2][2]
-          //       ].nickname
-          //     );
-
-          //     // MESSAGE TO USERS
-          //     app.io.to(leaderB[1][2]).emit(
-          //       "chat announce taxs",
-          //       "language.taxs",
-          //       "green",
-          //       `${lastOne[0]}`,
-          //       `${firstOne[0]}`
-          //     );
-
-          //     app.io.to(leaderB[leaderB.length - 2][2]).emit(
-          //       "chat announce taxs",
-          //       "language.taxs",
-          //       "red",
-          //       `${firstOne[0]}`,
-          //       `${lastOne[0]}`
-          //     );
-          //   }
-          // }
-
-          app.io.to("waiting room").emit(
-            "refresh waiting room",
-            socket.userData,
-            roomsInfo.rooms.open,
-            user_count
-          ); // notify start to main room
-
-          app.io.to(room_name).emit(
-            "refresh game room",
-            roomsInfo.rooms.open[room_name]
-          );
+          cnt += 1;
         }
-      }
-    } else if (roomsInfo.rooms.hide.hasOwnProperty(room_name)) {
-      if (socket.userData.ready === true) {
-        socket.userData.ready = false;
-        roomsInfo.rooms.hide[room_name].game.readyCount--;
-        syncUserToRoom(socket, roomsInfo.rooms.hide);
+
+        app.io.to("waiting room").emit(
+          "refresh waiting room",
+          socket.userData,
+          roomsInfo.rooms.open,
+          user_count
+        ); // notify start to main room
 
         app.io.to(room_name).emit(
           "refresh game room",
-          roomsInfo.rooms.hide[room_name]
+          roomsInfo.rooms.open[room_name]
         );
-        return;
+
+        app.io.to(room_name).emit("game start", "check revolution");
       }
+    }
+  });
 
-      // Ready only on Waiting room
-      if (
-        roomsInfo.rooms.hide[room_name].game.state == game_state.WAITING &&
-        !socket.userData.ready
-      ) {
-        socket.userData.ready = true;
-        roomsInfo.rooms.hide[room_name].game.readyCount++;
-        syncUserToRoom(socket, roomsInfo.rooms.hide);
 
-        // send out updated data
-        app.io.to(room_name).emit(
-          "refresh game room",
-          roomsInfo.rooms.hide[room_name]
-        );
+  // revolution & tax
+  socket.on("revolution", (isRevolution) => {
+    const sid = socket.userData.sid;
+    const roomName = socket.userData.cur_room;
 
-        // CHECK TO START GAME
-        // Shared data, so use roomData not userData
-        if (
-          Object.keys(roomsInfo.rooms.hide[room_name].sockets).length >= 2 &&
-          roomsInfo.rooms.hide[room_name].game.readyCount ==
-          Object.keys(roomsInfo.rooms.hide[room_name].sockets).length
-        ) {
-          //start game
-          console.log("NEW:", room_name + ": game started");
-          app.io.to(room_name).emit("chat announce", "language.started", "blue");
+    let roomData = roomsInfo.rooms.open[roomName];
+    let gameData = roomsInfo.rooms.open[roomName].game;
+    gameData.revolutionList.push([sid, isRevolution]);
 
-          // set order, shuffle, etc.
-          roomsInfo.rooms.hide[room_name].game.start(
-            roomsInfo.rooms.hide[room_name]
-          );
+    let inGamePlayerCnt = 0;
+    for(const [sid, userData] of Object.entries(roomsInfo.rooms.open[roomName].sockets)) {
+      if(userData.ready) inGamePlayerCnt += 1;
+    }
 
-          // distribute
-          let handlim = Math.floor(
-            80 / Object.keys(roomsInfo.rooms.hide[room_name].sockets).length
-          );
-          let cnt = 0;
-          for (const [sid, user] of Object.entries(
-              roomsInfo.rooms.hide[room_name].sockets
-            )) {
-            for (let i = cnt * handlim; i < handlim * cnt + handlim; i++) {
-              user.hand.push(roomsInfo.rooms.hide[room_name].game.deck[i]); // userData and room user Data not in sync
-              user.pointsReceived = false; // Reset points condition
-            }
-            cnt++;
-          }
+    if(inGamePlayerCnt != gameData.revolutionList.length) {
+      return;
+    }
 
-          // SWAP CARDS TAXS
-          if (roomsInfo.rooms.hide[room_name].leaderBoard) {
-            let leaderB = roomsInfo.rooms.hide[room_name].leaderBoard;
-            if (
-              leaderB[0][3] === "greaterDalmuti" &&
-              leaderB[leaderB.length - 1][3] === "greaterPeon"
-            ) {
-              // SORT FIRST
-              roomsInfo.rooms.hide[room_name].sockets[leaderB[0][2]].hand.sort(
-                function (a, b) {
-                  return a - b;
-                }
-              );
-              roomsInfo.rooms.hide[room_name].sockets[
-                leaderB[leaderB.length - 1][2]
-              ].hand.sort(function (a, b) {
-                return a - b;
-              });
+    // all player submitted
+    for(const [sid, isRevolution] of gameData.revolutionList) {
+      if(!isRevolution) continue;
+      gameData.taxSkip = true;
+      // 대혁명
+      // 중간에 빈 자리가 있다면? 중간에 spectator가 들어왔다면? -> 나중에 생각
+      for(let [sid, userData] of roomsInfo.rooms.open[roomName].sockets) {
+        roomData.sockets[sid].seat = inGamePlayerCnt - roomData.sockets[sid].seat - 1;
+        // userData.seat = inGamePlayerCnt - userData.seat - 1;
+      }
+    }
+    gameData.state = game_state.PLAYING;
+
+    // --------------------------------------------------------
+    // TAX 세금
+
+    if(!gameData.taxSkip) {
+      app.io.to("waiting room").emit(
+        "refresh waiting room",
+        socket.userData,
+        roomsInfo.rooms.open,
+        user_count
+      );
+      app.io.to(room_name).emit(
+        "refresh game room",
+        roomsInfo.rooms.open[room_name]
+      );
+      app.io.to(room_name).emit("game real start", "revolution & tax stage end");
+
+      // TODO: 세금 면제 메시지 전송
+      return;
+    }
+
+    // SWAP CARDS TAXS
+    const room_name = roomName; // tlqkf
+    let leaderB = roomsInfo.rooms.open[room_name].leaderBoard;
+    if (
+      leaderB[0][3] === "greaterDalmuti" &&
+      leaderB[leaderB.length - 1][3] === "greaterPeon"
+    ) {
+      // SORT FIRST
+      roomsInfo.rooms.open[room_name].sockets[leaderB[0][2]].hand.sort((a, b) => a - b);
+      roomsInfo.rooms.open[room_name].sockets[
+        leaderB[leaderB.length - 1][2]
+      ].hand.sort((a, b) => a - b);
 
               // TAKE CARTS
               let lastTwo =
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[0][2]
                 ].hand.splice(-2);
               let isJolly = lastTwo.findIndex((val) => {
                 return val === 13;
               });
               if (isJolly !== -1) {
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[0][2]
                 ].hand.unshift(lastTwo.splice(isJolly, 1));
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[0][2]
                 ].hand.push(lastTwo[0]);
                 lastTwo =
-                  roomsInfo.rooms.hide[room_name].sockets[
+                  roomsInfo.rooms.open[room_name].sockets[
                     leaderB[0][2]
                   ].hand.splice(-2);
               }
@@ -512,32 +325,32 @@ app.io.on("connection", (socket) => {
                 return val === 13;
               });
               if (isJolly !== -1) {
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[0][2]
                 ].hand.unshift(lastTwo.splice(isJolly, 1));
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[0][2]
                 ].hand.push(lastTwo[0]);
                 lastTwo =
-                  roomsInfo.rooms.hide[room_name].sockets[
+                  roomsInfo.rooms.open[room_name].sockets[
                     leaderB[0][2]
                   ].hand.splice(-2);
               }
-              let firstTwo = roomsInfo.rooms.hide[room_name].sockets[
+              let firstTwo = roomsInfo.rooms.open[room_name].sockets[
                 leaderB[leaderB.length - 1][2]
               ].hand.splice(0, 2);
 
               // SWAP CARDS
-              roomsInfo.rooms.hide[room_name].sockets[
+              roomsInfo.rooms.open[room_name].sockets[
                 leaderB[leaderB.length - 1][2]
               ].hand.push(lastTwo[1]);
-              roomsInfo.rooms.hide[room_name].sockets[
+              roomsInfo.rooms.open[room_name].sockets[
                 leaderB[leaderB.length - 1][2]
               ].hand.push(lastTwo[0]);
-              roomsInfo.rooms.hide[room_name].sockets[
+              roomsInfo.rooms.open[room_name].sockets[
                 leaderB[0][2]
               ].hand.unshift(firstTwo[1]);
-              roomsInfo.rooms.hide[room_name].sockets[
+              roomsInfo.rooms.open[room_name].sockets[
                 leaderB[0][2]
               ].hand.unshift(firstTwo[0]);
 
@@ -546,8 +359,8 @@ app.io.on("connection", (socket) => {
                 "chat announce",
                 "language.swap",
                 "blue",
-                roomsInfo.rooms.hide[room_name].sockets[leaderB[0][2]].nickname,
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[leaderB[0][2]].nickname,
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[leaderB.length - 1][2]
                 ].nickname
               );
@@ -574,12 +387,12 @@ app.io.on("connection", (socket) => {
               leaderB[leaderB.length - 2][3] === "lesserPeon"
             ) {
               // SORT FIRST
-              roomsInfo.rooms.hide[room_name].sockets[leaderB[1][2]].hand.sort(
+              roomsInfo.rooms.open[room_name].sockets[leaderB[1][2]].hand.sort(
                 function (a, b) {
                   return a - b;
                 }
               );
-              roomsInfo.rooms.hide[room_name].sockets[
+              roomsInfo.rooms.open[room_name].sockets[
                 leaderB[leaderB.length - 2][2]
               ].hand.sort(function (a, b) {
                 return a - b;
@@ -587,29 +400,30 @@ app.io.on("connection", (socket) => {
 
               // TAKE CARTS
               let lastOne =
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[1][2]
                 ].hand.splice(-1);
               let isJolly = lastOne.findIndex((val) => {
                 return val === 13;
               });
               if (isJolly !== -1) {
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[1][2]
                 ].hand.unshift(lastOne.splice(isJolly, 1));
                 lastOne =
-                  roomsInfo.rooms.hide[room_name].sockets[
+                  roomsInfo.rooms.open[room_name].sockets[
                     leaderB[1][2]
                   ].hand.splice(-1);
               }
-              let firstOne = roomsInfo.rooms.hide[room_name].sockets[
+              let firstOne = roomsInfo.rooms.open[room_name].sockets[
                 leaderB[leaderB.length - 2][2]
               ].hand.splice(0, 1);
+
               // SWAP CARDS
-              roomsInfo.rooms.hide[room_name].sockets[
+              roomsInfo.rooms.open[room_name].sockets[
                 leaderB[leaderB.length - 2][2]
               ].hand.push(lastOne[0]);
-              roomsInfo.rooms.hide[room_name].sockets[
+              roomsInfo.rooms.open[room_name].sockets[
                 leaderB[1][2]
               ].hand.unshift(firstOne[0]);
 
@@ -618,8 +432,8 @@ app.io.on("connection", (socket) => {
                 "chat announce",
                 "language.swap",
                 "blue",
-                roomsInfo.rooms.hide[room_name].sockets[leaderB[1][2]].nickname,
-                roomsInfo.rooms.hide[room_name].sockets[
+                roomsInfo.rooms.open[room_name].sockets[leaderB[1][2]].nickname,
+                roomsInfo.rooms.open[room_name].sockets[
                   leaderB[leaderB.length - 2][2]
                 ].nickname
               );
@@ -643,13 +457,17 @@ app.io.on("connection", (socket) => {
             }
           }
 
-          app.io.to(room_name).emit(
-            "refresh game room",
-            roomsInfo.rooms.hide[room_name]
-          );
-        }
-      }
-    }
+    app.io.to("waiting room").emit(
+      "refresh waiting room",
+      socket.userData,
+      roomsInfo.rooms.open,
+      user_count
+    );
+    app.io.to(room_name).emit(
+      "refresh game room",
+      roomsInfo.rooms.open[room_name]
+    );
+    app.io.to(room_name).emit("game real start", "revolution & tax stage end");
   });
 
   socket.on("play", (selected_card) => {
@@ -902,7 +720,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj[player].reset(leaderBoard.length);
+                  obj[player].setOrder(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj[player].nickname, obj[player].order);
                 } else if (
@@ -911,7 +729,7 @@ app.io.on("connection", (socket) => {
                   !obj[player].ready
                 ) {
                   leaderBoard.push([0, obj[player].nickname, player]);
-                  obj[player].reset(leaderBoard.length);
+                  obj[player].setOrder(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj[player].nickname, obj[player].order);
                 } else {
@@ -920,7 +738,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj[player].reset(leaderBoard.length);
+                  obj[player].setOrder(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj[player].nickname, obj[player].order);
                 }
@@ -961,7 +779,7 @@ app.io.on("connection", (socket) => {
                 for (const [sid, userData] of Object.entries(
                     roomsInfo.rooms.hide[room_name].sockets
                   )) {
-                  userData.reset(-1);
+                  userData.reset();
                 }
               }
             }
@@ -1015,21 +833,6 @@ app.io.on("connection", (socket) => {
         socket.userData,
         roomsInfo.rooms.open,
         user_count
-      );
-    } else if (roomsInfo.rooms.hide.hasOwnProperty(socket.userData.cur_room)) {
-
-      if (roomsInfo.rooms.hide[socket.userData.cur_room].leaderBoard) {
-        let index = 10
-        roomsInfo.rooms.hide[socket.userData.cur_room].leaderBoard.forEach((val, i) => {
-          if (val[2] === socket.id) index = i
-        })
-        roomsInfo.rooms.hide[socket.userData.cur_room].leaderBoard.splice(index, 1)
-      }
-
-      updateRoomDisconnect(
-        socket,
-        socket.userData.cur_room,
-        roomsInfo.rooms.hide
       );
     }
   });
@@ -1163,88 +966,6 @@ function joinRoom(socket, roomObj, room_name, hide) {
     );
 
     app.io.to(room_name).emit("refresh game room", roomsInfo.rooms.open[room_name]); // send info about room
-    app.io.to(room_name).emit("chat connection", socket.userData);
-
-    socket.emit("update sender", socket.userData);
-  } else if (roomsInfo.rooms.hide.hasOwnProperty(room_name)) {
-    // Loop for free seats
-    for (let i = 0; i < 8; i++) {
-      if (!roomObj.hide[room_name].seats[i]) {
-        // is vacant
-        roomObj.hide[room_name].seats[i] = true;
-        socket.userData.seat = i;
-        break;
-      }
-    }
-
-    // Check if room is full
-    if (socket.userData.seat == -1) {
-      //TODO full emit
-      console.log("room full");
-      socket.leave(room_name);
-      socket.join("waiting room");
-      socket.emit("connectUrl", "/");
-      socket.emit("alert", "language.roomFull");
-      return false;
-    }
-
-    // if there is no game object, give one
-    if (!roomObj.hide[room_name].game)
-      roomObj.hide[room_name].game = new Game();
-
-    //update user
-    socket.userData.cur_room = room_name;
-
-    //update room data
-    syncUserToRoom(socket, roomObj.hide);
-
-    //refresh list
-    app.io.to(room_name).emit("refresh game room", roomsInfo.rooms.hide[room_name]); // send info about room
-
-    app.io.to(room_name).emit("chat connection", socket.userData);
-
-    socket.emit("update sender", socket.userData);
-  } else if (hide) {
-    if (!roomObj.hide[room_name] || !roomObj.hide[room_name].seats) {
-      roomObj.hide[room_name] = {};
-      roomObj.hide[room_name].seats = new Array(8).fill(false);
-    }
-
-    // Loop for free seats
-    for (let i = 0; i < 8; i++) {
-      if (!roomObj.hide[room_name].seats[i]) {
-        // is vacant
-        roomObj.hide[room_name].seats[i] = true;
-        socket.userData.seat = i;
-        break;
-      }
-    }
-
-    // Check if room is full
-    if (socket.userData.seat == -1) {
-      //TODO full emit
-      console.log("room full");
-      socket.leave(room_name);
-      socket.join("waiting room");
-
-      socket.emit("connectUrl", "/");
-      socket.emit("alert", "language.roomFull");
-      return false;
-    }
-
-    // if there is no game object, give one
-    if (!roomObj.hide[room_name].game)
-      roomObj.hide[room_name].game = new Game();
-
-    //update user
-    socket.userData.cur_room = room_name;
-
-    //update room data
-    syncUserToRoom(socket, roomObj.hide);
-
-    //refresh list
-    app.io.to(room_name).emit("refresh game room", roomsInfo.rooms.hide[room_name]); // send info about room
-
     app.io.to(room_name).emit("chat connection", socket.userData);
 
     socket.emit("update sender", socket.userData);
