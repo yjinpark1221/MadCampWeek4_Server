@@ -328,70 +328,54 @@ $(function () {
     $("#room-list").append($newRoom);
   }
 
+  function toJob(idx, total) {
+    const jobs = ["대통령", "대장", "소장", "대령", "병장", "상병", "일병", "이병"];
+    if (idx == 0) {
+      return jobs[0];
+    }
+    if (idx == total - 1) {
+      return jobs[7];
+    }
+    if (idx == 1) {
+      return jobs[1];
+    }
+    if (idx == total - 2) {
+      return jobs[6];
+    }
+    if (idx == 2) {
+      return jobs[2];
+    }
+    if (idx == total - 3) {
+      return jobs[5];
+    }
+    if (idx == 3) {
+      return jobs[3];
+    }
+    if (idx == total - 4) {
+      return jobs[4];
+    }
+  }
+
   // SHOW POINTS
   function showPoints(leaderBoard) {
     $("#statistics").empty(); // Clear first
     $("#statistics-media").empty();
+    let tmp = new Array(8).fill(null);
     // APPEND PLAYERS
     try {
       leaderBoard.forEach((val, i) => {
-        let div;
-        if (val[3] === "greaterDalmuti") {
-          $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
-          $(`#${val[2]}`)
-            .parent()
-            .parent()
-            .children()
-            .eq(0)
-            .addClass("greaterDalmuti");
-          div = $(
-            `<div id=${val[2]} style="font-size: 1.5rem;color: burlywood;" class="col w-100 pointsDiv"><i class="gg-crown"></i> ${val[1]}: ${val[0]}</div>`
-          );
-        } else if (val[3] === "lesserDalmuti") {
-          $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
-          $(`#${val[2]}`)
-            .parent()
-            .parent()
-            .children()
-            .eq(0)
-            .addClass("lesserDalmuti");
-          div = $(
-            `<div id=${val[2]} style="font-size: 1.2rem;" class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
-          );
-        } else if (val[3] === "lesserPeon") {
-          $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
-          $(`#${val[2]}`)
-            .parent()
-            .parent()
-            .children()
-            .eq(0)
-            .addClass("lesserPeon");
-          div = $(
-            `<div id=${val[2]} style="font-size: 0.8rem;" class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
-          );
-        } else if (val[3] === "greaterPeon") {
-          $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
-          $(`#${val[2]}`)
-            .parent()
-            .parent()
-            .children()
-            .eq(0)
-            .addClass("greaterPeon");
-          div = $(
-            `<div id=${val[2]} style="font-size: 0.8rem;" class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
-          );
-        } else {
-          $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
-          $(`#${val[2]}`)
-            .parent()
-            .parent()
-            .children()
-            .eq(0)
-            .addClass("merchant");
-          div = $(
-            `<div id=${val[2]} class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
-          );
+        if (tmp[val[0]] != null) {
+          tmp[val[0]] = null;
+          return;
         }
+        tmp[val[0]] = val[1];
+      });
+
+      tmp.forEach((val, i) => {
+        console.log(val, i);
+        let div = $(
+          `<div class="col w-100 pointsDiv"> ${val} ${toJobs(i, leaderBoard.length())} </div>`
+        );
         let spaceDiv = $('<div class="w-100"></div>');
         if (width > 600) $("#statistics").append(div, spaceDiv);
         else $("#statistics-media").append(div, spaceDiv);
