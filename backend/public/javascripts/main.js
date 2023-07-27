@@ -1,6 +1,7 @@
 let game_state = {
   WAITING: 0,
   PLAYING: 1,
+  CHECKREVOLUTION: 2,
 };
 
 let socket = io();
@@ -245,6 +246,10 @@ $(function () {
   //Enter Game Room
   socket.on("refresh game room", (roomData, passed, socketInfo) => {
     console.log("refresh game room ", roomData.game.state);
+    if (roomData.game.state == game_state.CHECKREVOLUTION) {
+      reloadCards(socket.id, roomData);
+      return;
+    }
     if (roomData.game.state == game_state.WAITING) {
       $("#ready-btn").removeClass("disabled");
       $("#home").removeClass("disabled");
