@@ -296,7 +296,6 @@ $(function () {
         buttonContainer.removeChild(buttonContainer.firstChild);
       }
     }, 5000);
-
   }
 
   //! Public(Shared) Update
@@ -464,6 +463,11 @@ $(function () {
     $("#error-msg").text("혁명을 일으키지 않습니다.");
   }
 
+  let jollyCount = 0;
+
+  function hasTwoJolly() {
+    return jollyCount >= 2;
+  }
 
   socket.on("game start", (msg) => {
       console.log('game started msg')
@@ -475,6 +479,10 @@ $(function () {
 
       // '아니오' 버튼 생성하고 컨테이너에 추가
       const noButton = createButton("아니오", onNoButtonClick, ['btn-danger', 'btn', 'ml-4']);
+
+      if (hasTwoJolly()) {
+        buttonContainer.appendChild(yesButton);
+      }
       buttonContainer.appendChild(yesButton);
       buttonContainer.appendChild(noButton);
       alert_big("혁명을 하시겠습니까?");
@@ -743,8 +751,6 @@ $(function () {
     userData.hand.sort(function (a, b) {
       return a - b;
     });
-    let actual_card_count = 1;
-
     // DO ANIMATION ONLY IF CAN PLAY CARDS
     if (!$("#play-btn").hasClass("disabled")) {
       // Fade cards out
@@ -760,7 +766,11 @@ $(function () {
       .done(function () {
         $("#hand").empty();
 
+        jollyCount = 0;
         for (let i = 0; i < userData.hand.length; i++) {
+          if (userData.hand[i] == 13) {
+            ++jollyCount;
+          }
           let $carddiv;
           // BACKGROUND COLOR = card_colors[userData.hand[i] - 1]
           if (userData.hand[i] != -1) {
@@ -804,7 +814,6 @@ $(function () {
             });
 
             $("#hand").append($carddiv);
-            actual_card_count++;
           }
         }
       });
