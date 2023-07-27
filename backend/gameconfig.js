@@ -1,5 +1,4 @@
-let connectNumber = 1;
-let user_count = 0;
+let userNumber = 0;
 let roomsInfo = { roomNumber: 0, rooms: { open: {}, hide: {} } };
 
 class Player {
@@ -150,6 +149,7 @@ class Game {
   }
 
   shuffle(array) {
+    // array.sort((a, b) => b - a);
     array.sort(() => Math.random() - 0.5);
     return array;
   }
@@ -174,7 +174,6 @@ module.exports = {
   Player,
   game_state,
   Game,
-  user_count,
-  connectNumber,
+  userNumber,
   roomsInfo,
 };

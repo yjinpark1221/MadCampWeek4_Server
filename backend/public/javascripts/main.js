@@ -219,7 +219,7 @@ $(function () {
   });
   
   // UPDATE WAITING ROOMS LIST IN MAIN
-  socket.on("refresh waiting room", (user, rooms, user_count) => {
+  socket.on("refresh waiting room", (user, rooms, userNumber) => {
     let roomCount = 0;
     $("#room-list").empty(); // Clear before adding
 
@@ -229,7 +229,7 @@ $(function () {
     }
 
     $("#title").html(
-      `${language.title} <br><strong>${roomCount} ${language.room} | ${user_count} ${language.usersOnline}</strong>`
+      `${language.title} <br><strong>${roomCount} ${language.room} | ${userNumber} ${language.usersOnline}</strong>`
     );
   });
 

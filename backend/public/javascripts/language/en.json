@@ -48,7 +48,7 @@
     "taxs": ["품위유지비를 납부함:", "월급을 받음:"],
     "leaderboard": "순위표",
     "confirmPass": "패스하실 것인가요?",
-    "revolutionOccur": "혁명이 일어났습니다!",
-    "bigRevolutionOccur": "대혁명이 일어났습니다!",
-    "taxSkip": "품위유지비가 면제됩니다!"
+    "revolutionOccur": "의 시위가 일어났습니다!",
+    "bigRevolutionOccur": "의 쿠데타가 일어났습니다! 정권이 바뀝니다.",
+    "taxSkip": "품위유지비가 면제됩니다."
 }
