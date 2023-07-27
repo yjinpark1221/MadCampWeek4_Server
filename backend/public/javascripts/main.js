@@ -244,6 +244,7 @@ $(function () {
 
   //Enter Game Room
   socket.on("refresh game room", (roomData, passed, socketInfo) => {
+    console.log("refresh game room ", roomData.game.state);
     if (roomData.game.state == game_state.WAITING) {
       $("#ready-btn").removeClass("disabled");
       $("#home").removeClass("disabled");
