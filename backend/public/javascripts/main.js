@@ -483,7 +483,6 @@ $(function () {
       if (hasTwoJolly()) {
         buttonContainer.appendChild(yesButton);
       }
-      buttonContainer.appendChild(yesButton);
       buttonContainer.appendChild(noButton);
       alert_big("혁명을 하시겠습니까?");
   })
