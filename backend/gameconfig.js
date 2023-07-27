@@ -61,6 +61,7 @@ class Game {
       if(roomData.sockets[sid].seat < 0)  roomData.sockets[sid].seat = cnt++;
     }
 
+    this.taxSkip = false;
     this.revolutionList = [];
     this.state = game_state.REVOLUTION;
     this.round++;

@@ -365,21 +365,11 @@ $(function () {
     // APPEND PLAYERS
     try {
       leaderBoard.forEach((val, i) => {
-        if (tmp[val[0]] != null) {
-          tmp[val[0]] = null;
-          return;
-        }
-        tmp[val[0]] = val[1];
-      });
+        const score = val[0];
+        const name = val[1];
+        const sid = val[2];
 
-      tmp.forEach((val, i) => {
-        if (val == null) {
-          return;
-        }
-        console.log(val, i);
-        let div = $(
-          `<div class="col w-100 pointsDiv"> ${val} ${toJob(i, leaderBoard.length)} </div>`
-        );
+        let div = $(`<div class="col w-100 pointsDiv"> ${name} ${toJob(i, leaderBoard.length)} </div>`);
         let spaceDiv = $('<div class="w-100"></div>');
         if (width > 600) $("#statistics").append(div, spaceDiv);
         else $("#statistics-media").append(div, spaceDiv);
