@@ -298,8 +298,8 @@ a {
 
 .backCard {
   background: url(./image/card_back.png);
-  height: 176px !important;
-  width: 124px !important;
+  height: 264px !important;
+  width: 186px !important;
   background-size: cover;
 }
 
@@ -416,10 +416,11 @@ a {
 
 .fieldMedia {
   height: 25%;
+  margin-bottom: 100px;
 }
 
 .fieldCards {
-  margin-left: -30px !important;
+  margin-left: -80px !important;
   height: 264px !important;
   width: 186px !important;
 }
@@ -443,7 +444,7 @@ a {
   }
 
   .fieldCards {
-    margin-left: -50px !important;
+    margin-left: -80px !important;
   }
 }
 
@@ -458,7 +459,7 @@ a {
   }
 
   .fieldCards {
-    margin-left: -50px !important;
+    margin-left: -80px !important;
   }
 
   .titleMedia {

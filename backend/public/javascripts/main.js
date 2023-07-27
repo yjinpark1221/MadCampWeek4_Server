@@ -288,7 +288,14 @@ $(function () {
     $("#error-msg").text(msg);
     setTimeout(() => {
       $("#error-msg-bg").fadeOut();
-    }, 3000);
+      if ($("#error-msg").textContent == "혁명을 하시겠습니까?") {
+        socket.emit("revolution", false);
+      }
+      const buttonContainer = document.getElementById("button-container");
+      while (buttonContainer.firstChild) {
+        buttonContainer.removeChild(buttonContainer.firstChild);
+      }
+    }, 5000);
   }
 
   //! Public(Shared) Update
@@ -422,6 +429,64 @@ $(function () {
       );
     }
   });
+
+  // 버튼을 생성하고 컨테이너에 추가하는 함수
+  function createButton(text, onClickHandler, classNames) {
+    const button = document.createElement("button");
+    button.textContent = text;
+    button.addEventListener("click", onClickHandler);
+
+    if (classNames && Array.isArray(classNames)) {
+      classNames.forEach(className => {
+        button.classList.add(className);
+      });
+    }
+
+    return button;
+  }
+
+  // '예' 버튼 클릭 이벤트 처리
+  function onYesButtonClick() {
+    // 여기에 '예' 버튼을 클릭했을 때의 동작을 작성하세요.
+    // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
+    console.log("예 클릭, 혁명");
+    socket.emit("revolution", true);
+    $("#error-msg").text("혁명을 일으킵니다");
+  }
+
+  // '아니오' 버튼 클릭 이벤트 처리
+  function onNoButtonClick() {
+    // 여기에 '아니오' 버튼을 클릭했을 때의 동작을 작성하세요.
+    // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
+    console.log("아니오 클릭, 혁명 X");
+    socket.emit("revolution", false);
+    $("#error-msg").text("혁명을 일으키지 않습니다.");
+  }
+
+  let jollyCount = 0;
+
+  function hasTwoJolly() {
+    return jollyCount >= 2;
+  }
+
+  socket.on("game start", (msg) => {
+      console.log('game started msg')
+      // 버튼 컨테이너 요소 찾기
+      const buttonContainer = document.getElementById("button-container");
+
+      // '예' 버튼 생성하고 컨테이너에 추가
+      const yesButton = createButton("예", onYesButtonClick, ['btn-success', 'btn']);
+
+      // '아니오' 버튼 생성하고 컨테이너에 추가
+      const noButton = createButton("아니오", onNoButtonClick, ['btn-danger', 'btn', 'ml-4']);
+
+      if (hasTwoJolly()) {
+        buttonContainer.appendChild(yesButton);
+      }
+      buttonContainer.appendChild(yesButton);
+      buttonContainer.appendChild(noButton);
+      alert_big("혁명을 하시겠습니까?");
+  })
 
   // CHAT ANNUNCE FUNCTION
   socket.on("chat announce", (msg, color, nickname, nickname1) => {
@@ -686,8 +751,6 @@ $(function () {
     userData.hand.sort(function (a, b) {
       return a - b;
     });
-    let actual_card_count = 1;
-
     // DO ANIMATION ONLY IF CAN PLAY CARDS
     if (!$("#play-btn").hasClass("disabled")) {
       // Fade cards out
@@ -703,7 +766,11 @@ $(function () {
       .done(function () {
         $("#hand").empty();
 
+        jollyCount = 0;
         for (let i = 0; i < userData.hand.length; i++) {
+          if (userData.hand[i] == 13) {
+            ++jollyCount;
+          }
           let $carddiv;
           // BACKGROUND COLOR = card_colors[userData.hand[i] - 1]
           if (userData.hand[i] != -1) {
@@ -736,15 +803,7 @@ $(function () {
                   .text(language.pass)
                   .removeClass('btn-success')
                   .addClass('btn-danger');
-              
-                $("#player" + i).append(
-                  $(
-                    "<div class='fontMediaSlots' style='color:var(--success);'>passed</div>"
-                  )
-                );
-                
-              
-              
+                          
               
                 } else {
                 $("#play-btn")
@@ -755,7 +814,6 @@ $(function () {
             });
 
             $("#hand").append($carddiv);
-            actual_card_count++;
           }
         }
       });
