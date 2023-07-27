@@ -1,6 +1,7 @@
 let game_state = {
   WAITING: 0,
   PLAYING: 1,
+  CHECKREVOLUTION: 2,
 };
 
 let socket = io();
@@ -244,6 +245,10 @@ $(function () {
 
   //Enter Game Room
   socket.on("refresh game room", (roomData, passed, socketInfo) => {
+    if (roomData.game.state == game_state.CHECKREVOLUTION) {
+      reloadCards(socket.id, roomData);
+      return;
+    }
     if (roomData.game.state == game_state.WAITING) {
       $("#ready-btn").removeClass("disabled");
       $("#home").removeClass("disabled");
@@ -483,7 +488,6 @@ $(function () {
       if (hasTwoJolly()) {
         buttonContainer.appendChild(yesButton);
       }
-      buttonContainer.appendChild(yesButton);
       buttonContainer.appendChild(noButton);
       alert_big("혁명을 하시겠습니까?");
   })
