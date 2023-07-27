@@ -298,8 +298,8 @@ a {
 
 .backCard {
   background: url(./image/card_back.png);
-  height: 176px !important;
-  width: 124px !important;
+  height: 264px !important;
+  width: 186px !important;
   background-size: cover;
 }
 
