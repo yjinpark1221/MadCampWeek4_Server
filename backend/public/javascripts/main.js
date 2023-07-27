@@ -436,8 +436,7 @@ $(function () {
     // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
     console.log("예 클릭, 혁명");
     socket.emit("revolution", true);
-    let idx = (socket.userData.seat == totalPlayers - 1) ? 1 : 0;
-    $("#error-msg").text(language.doRevolution[idx]);
+    $("#error-msg").text(language.doRevolution[isLastPlayer]);
     const buttonContainer = document.getElementById("button-container");
     while (buttonContainer.firstChild) {
       buttonContainer.removeChild(buttonContainer.firstChild);
@@ -450,8 +449,7 @@ $(function () {
     // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
     console.log("아니오 클릭, 혁명 X");
     socket.emit("revolution", false);
-    let idx = (socket.userData.seat == totalPlayers - 1) ? 1 : 0;
-    $("#error-msg").text(language.noRevolution[idx]);
+    $("#error-msg").text(language.noRevolution[isLastPlayer]);
     const buttonContainer = document.getElementById("button-container");
     while (buttonContainer.firstChild) {
       buttonContainer.removeChild(buttonContainer.firstChild);
@@ -463,6 +461,8 @@ $(function () {
   function hasTwoJolly() {
     return jollyCount >= 2;
   }
+
+  let isLastPlayer = 0;
 
   socket.on("game start", (roomData, totalPlayers) => {
       console.log('game started msg')
@@ -479,8 +479,8 @@ $(function () {
         buttonContainer.appendChild(yesButton);
       }
       buttonContainer.appendChild(noButton);
-      let idx = (socket.userData.seat == totalPlayers - 1) ? 1 : 0;
-      alert_big(language.askRevolution[idx]);
+      isLastPlayer = (roomData.sockets[socket.id].seat == totalPlayers - 1) ? 1 : 0;
+      alert_big(language.askRevolution[isLastPlayer]);
   })
 
   // CHAT ANNUNCE FUNCTION
