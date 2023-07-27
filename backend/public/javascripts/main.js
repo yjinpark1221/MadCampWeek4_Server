@@ -288,12 +288,14 @@ $(function () {
     $("#error-msg").text(msg);
     setTimeout(() => {
       $("#error-msg-bg").fadeOut();
-    }, 3000);
-
-    const buttonContainer = document.getElementById("button-container");
-    while (buttonContainer.firstChild) {
-      buttonContainer.removeChild(buttonContainer.firstChild);
-    }
+      if ($("#error-msg").textContent == "혁명을 하시겠습니까?") {
+        socket.emit("revolution", false);
+      }
+      const buttonContainer = document.getElementById("button-container");
+      while (buttonContainer.firstChild) {
+        buttonContainer.removeChild(buttonContainer.firstChild);
+      }
+    }, 5000);
 
   }
 
@@ -443,6 +445,7 @@ $(function () {
     // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
     console.log("예 클릭, 혁명");
     socket.emit("revolution", true);
+    $("#error-msg").text("혁명을 일으킵니다");
   }
 
   // '아니오' 버튼 클릭 이벤트 처리
@@ -451,10 +454,12 @@ $(function () {
     // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
     console.log("아니오 클릭, 혁명 X");
     socket.emit("revolution", false);
+    $("#error-msg").text("혁명을 일으키지 않습니다.");
   }
 
 
   socket.on("game start"), (msg) => {
+      console.log("game start msg")
       // 버튼 컨테이너 요소 찾기
       const buttonContainer = document.getElementById("button-container");
 
