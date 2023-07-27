@@ -10,6 +10,7 @@ class Player {
     this.ready = false;
     this.hand = [];
     this.order = -1;
+    this.sid = sid;
   }
 
   reset() {
@@ -30,6 +31,7 @@ class Player {
 var game_state = {
   WAITING: 0,
   PLAYING: 1,
+  REVOLUTION: 2,
 };
 
 class Game {
@@ -39,6 +41,8 @@ class Game {
     this.deck = this.prepareDeck();
     this.cur_order_idx = -1;
     this.round = -1;
+    this.revolutionList = [];
+    this.taxSkip = false;
   }
 
   updateOrder(omit_i) {
@@ -58,8 +62,8 @@ class Game {
       if(roomData.sockets[sid].seat < 0)  roomData.sockets[sid].seat = cnt++;
     }
 
-
-    this.state = game_state.PLAYING;
+    this.revolutionList = [];
+    this.state = game_state.REVOLUTION;
     this.round++;
 
     // order: order for the whole game
