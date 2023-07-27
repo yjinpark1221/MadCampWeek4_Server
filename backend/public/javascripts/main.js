@@ -288,12 +288,13 @@ $(function () {
     $("#error-msg").text(msg);
     setTimeout(() => {
       $("#error-msg-bg").fadeOut();
+      while (buttonContainer.firstChild) {
+        buttonContainer.removeChild(buttonContainer.firstChild);
+      }
     }, 3000);
 
     const buttonContainer = document.getElementById("button-container");
-    while (buttonContainer.firstChild) {
-      buttonContainer.removeChild(buttonContainer.firstChild);
-    }
+
 
   }
 
@@ -430,10 +431,17 @@ $(function () {
   });
 
   // 버튼을 생성하고 컨테이너에 추가하는 함수
-  function createButton(text, onClickHandler) {
+  function createButton(text, onClickHandler, classNames) {
     const button = document.createElement("button");
     button.textContent = text;
     button.addEventListener("click", onClickHandler);
+
+    if (classNames && Array.isArray(classNames)) {
+      classNames.forEach(className => {
+        button.classList.add(className);
+      });
+    }
+
     return button;
   }
 
@@ -454,19 +462,20 @@ $(function () {
   }
 
 
-  socket.on("game start"), (msg) => {
+  socket.on("game start", (msg) => {
+      console.log('game started msg')
       // 버튼 컨테이너 요소 찾기
       const buttonContainer = document.getElementById("button-container");
 
       // '예' 버튼 생성하고 컨테이너에 추가
-      const yesButton = createButton("예", onYesButtonClick);
+      const yesButton = createButton("예", onYesButtonClick, ['btn-success', 'btn']);
 
       // '아니오' 버튼 생성하고 컨테이너에 추가
-      const noButton = createButton("아니오", onNoButtonClick);
+      const noButton = createButton("아니오", onNoButtonClick, ['btn-danger', 'btn', 'ml-4']);
       buttonContainer.appendChild(yesButton);
       buttonContainer.appendChild(noButton);
       alert_big("혁명을 하시겠습니까?");
-  }
+  })
 
   // CHAT ANNUNCE FUNCTION
   socket.on("chat announce", (msg, color, nickname, nickname1) => {
