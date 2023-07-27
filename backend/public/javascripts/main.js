@@ -295,6 +295,7 @@ $(function () {
     setTimeout(() => {
       $("#error-msg-bg").fadeOut();
       if ($("#error-msg").textContent == "혁명을 하시겠습니까?") {
+        console.log("클릭 없음, 혁명 X");
         socket.emit("revolution", false);
       }
       const buttonContainer = document.getElementById("button-container");
