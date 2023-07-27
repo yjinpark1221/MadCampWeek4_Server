@@ -736,15 +736,7 @@ $(function () {
                   .text(language.pass)
                   .removeClass('btn-success')
                   .addClass('btn-danger');
-              
-                $("#player" + i).append(
-                  $(
-                    "<div class='fontMediaSlots' style='color:var(--success);'>passed</div>"
-                  )
-                );
-                
-              
-              
+                          
               
                 } else {
                 $("#play-btn")
