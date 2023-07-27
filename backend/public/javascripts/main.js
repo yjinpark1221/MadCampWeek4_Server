@@ -217,11 +217,6 @@ $(function () {
       } else socket.emit("play", selected_card);
     }
   });
-
-  $("#reload-btn").on("click", () => {
-      // Confirm alert if passing with no card on field
-      $('.handCard').removeClass("selected")
-  });
   
   // UPDATE WAITING ROOMS LIST IN MAIN
   socket.on("refresh waiting room", (user, rooms, user_count) => {
@@ -370,9 +365,6 @@ $(function () {
     // APPEND PLAYERS
     try {
       leaderBoard.forEach((val, i) => {
-        if (val == null) {
-          return;
-        }
         if (tmp[val[0]] != null) {
           tmp[val[0]] = null;
           return;
@@ -381,6 +373,9 @@ $(function () {
       });
 
       tmp.forEach((val, i) => {
+        if (val == null) {
+          return;
+        }
         console.log(val, i);
         let div = $(
           `<div class="col w-100 pointsDiv"> ${val} ${toJob(i, leaderBoard.length)} </div>`
@@ -823,6 +818,11 @@ $(function () {
             $("#hand").append($carddiv);
           }
         }
+        $("#reload-btn").on("click", () => {
+          // Confirm alert if passing with no card on field
+          $('.handCard').removeClass("selected")
+          selected_card = {};
+      });
       });
   }
 
