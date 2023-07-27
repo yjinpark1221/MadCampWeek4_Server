@@ -200,6 +200,7 @@ app.io.on("connection", (socket) => {
           //start game
           console.log("NEW:", room_name + ": game started");
           app.io.to(room_name).emit("chat announce", "language.started", "blue");
+          app.io.to(room_name).emit("game start", "check revolution");
 
           // set order, shuffle, etc.
           roomsInfo.rooms.open[room_name].game.start(
