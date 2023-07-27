@@ -72,7 +72,7 @@ app.io = require('socket.io')();
 
 app.io.on("connection", (socket) => {
   user_count++;
-  socket.userData = new Player("Guest" + connectNumber, "main room");
+  socket.userData = new Player("Guest" + connectNumber, socket.id, "main room");
   connectNumber++;
 
   // give update to a client only
@@ -244,11 +244,10 @@ app.io.on("connection", (socket) => {
     const roomName = socket.userData.cur_room;
     const room_name = roomName; // tlqkf
 
-
     let roomData = roomsInfo.rooms.open[roomName];
-    console.log("roomData: ", JSON.stringify(roomData));
     let gameData = roomsInfo.rooms.open[roomName].game;
     gameData.revolutionList.push([sid, isRevolution]);
+    console.log("roomData: ", JSON.stringify(roomData));
 
     let inGamePlayerCnt = 0;
     for(const [sid, userData] of Object.entries(roomsInfo.rooms.open[roomName].sockets)) {
@@ -265,18 +264,18 @@ app.io.on("connection", (socket) => {
       gameData.taxSkip = true;
       // 대혁명
       // 중간에 빈 자리가 있다면? 중간에 spectator가 들어왔다면? -> 나중에 생각
-      for(let [sid, userData] of Object.entries(roomsInfo.rooms.open[roomName].sockets)) {
-        roomData.sockets[sid].seat = inGamePlayerCnt - roomData.sockets[sid].seat - 1;
-        // userData.seat = inGamePlayerCnt - userData.seat - 1;
-      }
+      // for(let [sid, userData] of Object.entries(roomsInfo.rooms.open[roomName].sockets)) {
+      //   roomData.sockets[sid].seat = inGamePlayerCnt - roomData.sockets[sid].seat - 1;
+      //   // userData.seat = inGamePlayerCnt - userData.seat - 1;
+      // }
     }
     gameData.state = game_state.PLAYING;
 
     // --------------------------------------------------------
     // TAX 세금
-    console.log("tax step");
+    console.log(`tax step: isSkip: ${gameData.taxSkip}`);
 
-    if(!gameData.taxSkip) {
+    if(gameData.taxSkip) {
       app.io.to("waiting room").emit(
         "refresh waiting room",
         socket.userData,
@@ -294,7 +293,7 @@ app.io.on("connection", (socket) => {
     }
 
     // SWAP CARDS TAXS
-    if(roomsInfo.rooms.open[room_name].leaderBoard) {
+    if(!gameData.taxSkip && roomsInfo.rooms.open[room_name].leaderBoard) {
       let leaderB = roomsInfo.rooms.open[room_name].leaderBoard;
       if (
         leaderB[0][3] === "greaterDalmuti" &&
