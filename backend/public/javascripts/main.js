@@ -218,6 +218,11 @@ $(function () {
     }
   });
 
+  $("#reload-btn").on("click", () => {
+      // Confirm alert if passing with no card on field
+      $('.handCard').removeClass("selected")
+  });
+  
   // UPDATE WAITING ROOMS LIST IN MAIN
   socket.on("refresh waiting room", (user, rooms, user_count) => {
     let roomCount = 0;
@@ -345,7 +350,7 @@ $(function () {
             .eq(0)
             .addClass("greaterDalmuti");
           div = $(
-            `<div id=${val[2]} style="font-size: 1.5rem;color: burlywood;" class="col w-100 pointsDiv"><i class="gg-crown"></i> ${val[1]}: ${val[0]}</div>`
+            `<div id=${val[2]} style="font-size: 1.5rem;color: burlywood;" class="col w-100 pointsDiv"><i class="gg-crown"></i> 대통령 : ${val[1]}</div>`
           );
         } else if (val[3] === "lesserDalmuti") {
           $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
@@ -356,7 +361,7 @@ $(function () {
             .eq(0)
             .addClass("lesserDalmuti");
           div = $(
-            `<div id=${val[2]} style="font-size: 1.2rem;" class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
+            `<div id=${val[2]} style="font-size: 1.2rem;" class="col w-100 pointsDiv"> 대장 : ${val[1]}</div>`
           );
         } else if (val[3] === "lesserPeon") {
           $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
@@ -367,7 +372,7 @@ $(function () {
             .eq(0)
             .addClass("lesserPeon");
           div = $(
-            `<div id=${val[2]} style="font-size: 0.8rem;" class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
+            `<div id=${val[2]} style="font-size: 0.8rem;" class="col w-100 pointsDiv">일병 : ${val[1]}</div>`
           );
         } else if (val[3] === "greaterPeon") {
           $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
@@ -378,7 +383,7 @@ $(function () {
             .eq(0)
             .addClass("greaterPeon");
           div = $(
-            `<div id=${val[2]} style="font-size: 0.8rem;" class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
+            `<div id=${val[2]} style="font-size: 0.8rem;" class="col w-100 pointsDiv"> 이병 : ${val[1]}</div>`
           );
         } else {
           $(`#${val[2]}`).parent().parent().children().eq(0).removeClass();
@@ -389,7 +394,7 @@ $(function () {
             .eq(0)
             .addClass("merchant");
           div = $(
-            `<div id=${val[2]} class="col w-100 pointsDiv">${val[1]}: ${val[0]}</div>`
+            `<div id=${val[2]} class="col w-100 pointsDiv"> 병장 : ${val[1]}</div>`
           );
         }
         let spaceDiv = $('<div class="w-100"></div>');
