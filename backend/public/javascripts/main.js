@@ -219,7 +219,7 @@ $(function () {
   });
   
   // UPDATE WAITING ROOMS LIST IN MAIN
-  socket.on("refresh waiting room", (user, rooms, userNumber) => {
+  socket.on("refresh waiting room", (user, rooms, user_count) => {
     let roomCount = 0;
     $("#room-list").empty(); // Clear before adding
 
@@ -229,7 +229,7 @@ $(function () {
     }
 
     $("#title").html(
-      `${language.title} <br><strong>${roomCount} ${language.room} | ${userNumber} ${language.usersOnline}</strong>`
+      `${language.title} <br><strong>${roomCount} ${language.room} | ${user_count} ${language.usersOnline}</strong>`
     );
   });
 
@@ -294,7 +294,7 @@ $(function () {
     $("#error-msg").text(msg);
     setTimeout(() => {
       $("#error-msg-bg").fadeOut();
-      if ($("#error-msg").textContent == "혁명을 하시겠습니까?") {
+      if ($("#error-msg").textContent == language.askRevolution[0] || $("#error-msg").textContent == language.askRevolution[1]) {
         console.log("클릭 없음, 혁명 X");
         socket.emit("revolution", false);
         const buttonContainer = document.getElementById("button-container");
@@ -446,7 +446,8 @@ $(function () {
     // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
     console.log("예 클릭, 혁명");
     socket.emit("revolution", true);
-    $("#error-msg").text("혁명을 일으킵니다");
+    let idx = (socket.userData.seat == totalPlayers - 1) ? 1 : 0;
+    $("#error-msg").text(language.doRevolution[idx]);
     const buttonContainer = document.getElementById("button-container");
     while (buttonContainer.firstChild) {
       buttonContainer.removeChild(buttonContainer.firstChild);
@@ -459,7 +460,8 @@ $(function () {
     // 예를 들면, 다른 함수를 호출하거나 특정 작업을 수행하는 코드를 넣을 수 있습니다.
     console.log("아니오 클릭, 혁명 X");
     socket.emit("revolution", false);
-    $("#error-msg").text("혁명을 일으키지 않습니다.");
+    let idx = (socket.userData.seat == totalPlayers - 1) ? 1 : 0;
+    $("#error-msg").text(language.noRevolution[idx]);
     const buttonContainer = document.getElementById("button-container");
     while (buttonContainer.firstChild) {
       buttonContainer.removeChild(buttonContainer.firstChild);
@@ -472,7 +474,7 @@ $(function () {
     return jollyCount >= 2;
   }
 
-  socket.on("game start", (msg) => {
+  socket.on("game start", (roomData, totalPlayers) => {
       console.log('game started msg')
       // 버튼 컨테이너 요소 찾기
       const buttonContainer = document.getElementById("button-container");
@@ -487,7 +489,8 @@ $(function () {
         buttonContainer.appendChild(yesButton);
       }
       buttonContainer.appendChild(noButton);
-      alert_big("혁명을 하시겠습니까?");
+      let idx = (socket.userData.seat == totalPlayers - 1) ? 1 : 0;
+      alert_big(language.askRevolution[idx]);
   })
 
   // CHAT ANNUNCE FUNCTION

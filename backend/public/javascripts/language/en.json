@@ -50,5 +50,8 @@
     "confirmPass": "패스하실 것인가요?",
     "revolutionOccur": "의 시위가 일어났습니다!",
     "bigRevolutionOccur": "의 쿠데타가 일어났습니다! 정권이 바뀝니다.",
-    "taxSkip": "품위유지비가 면제됩니다."
+    "taxSkip": "품위유지비가 면제됩니다.",
+    "askRevolution": ["시위를 일으키시겠습니까?", "쿠데타를 일으키시겠습니까?"],
+    "doRevolution": ["시위를 일으켰습니다.", "쿠데타를 일으켰습니다."],
+    "noRevolution": ["시위를 일으키지 않았습니다.", "쿠데타를 일으키지 않았습니다."]
 }
