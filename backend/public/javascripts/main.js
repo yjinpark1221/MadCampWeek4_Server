@@ -562,7 +562,7 @@ $(function () {
         for (const [sid, user] of Object.entries(roomData.sockets)) {
           if (!roomData.leaderBoard.find((el) => el[2] === sid)) {
             roomData.leaderBoard.push([0, user.nickname, sid, 'merchant'])
-            user.reset(roomData.leaderBoard.length);
+            user.setOrder(roomData.leaderBoard.length);
             console.log(leaderBoard);
             console.log(user.nickname, user.order);
           }
@@ -781,15 +781,7 @@ $(function () {
                   .text(language.pass)
                   .removeClass('btn-success')
                   .addClass('btn-danger');
-              
-                $("#player" + i).append(
-                  $(
-                    "<div class='fontMediaSlots' style='color:var(--success);'>passed</div>"
-                  )
-                );
-                
-              
-              
+                          
               
                 } else {
                 $("#play-btn")

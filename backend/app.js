@@ -737,9 +737,6 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj[player].reset(leaderBoard.length);
-                  console.log(leaderBoard);
-                  console.log(obj[player].nickname, obj[player].order);
                 } else if (
                   (obj[player].hand.length > 0 &&
                     !obj[player].pointsReceived &&
@@ -747,21 +744,20 @@ app.io.on("connection", (socket) => {
                   !obj[player].ready
                 ) {
                   leaderBoard.push([0, obj[player].nickname, player]);
-                  obj[player].reset(leaderBoard.length);
-                  console.log(leaderBoard);
-                  console.log(obj[player].nickname, obj[player].order);
                 } else {
                   leaderBoard.push([
                     obj[player].points,
                     obj[player].nickname,
                     player,
                   ]);
-                  obj[player].reset(leaderBoard.length);
-                  console.log(leaderBoard);
-                  console.log(obj[player].nickname, obj[player].order);
                 }
               }
+              console.log(leaderBoard);
               leaderBoard.sort((a, b) => b[0] - a[0]); // For descending sort
+              for(let i = 0; i < leaderBoard.length; ++i) {
+                const sid = leaderBoard[i][2];
+                obj[sid].setOrder(i);
+              }
 
               if (leaderBoard.length === 3) {
                 leaderBoard[0].push("greaterDalmuti");
@@ -795,7 +791,7 @@ app.io.on("connection", (socket) => {
                 for (const [sid, userData] of Object.entries(
                     roomsInfo.rooms.open[room_name].sockets
                   )) {
-                  userData.reset(-1);
+                  userData.reset();
                 }
               }
             }
@@ -902,7 +898,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj[player].reset(leaderBoard.length);
+                  obj[player].setOrder(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj[player].nickname, obj[player].order);
                 } else if (
@@ -911,7 +907,7 @@ app.io.on("connection", (socket) => {
                   !obj[player].ready
                 ) {
                   leaderBoard.push([0, obj[player].nickname, player]);
-                  obj[player].reset(leaderBoard.length);
+                  obj[player].setOrder(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj[player].nickname, obj[player].order);
                 } else {
@@ -920,7 +916,7 @@ app.io.on("connection", (socket) => {
                     obj[player].nickname,
                     player,
                   ]);
-                  obj[player].reset(leaderBoard.length);
+                  obj[player].setOrder(leaderBoard.length);
                   console.log(leaderBoard);
                   console.log(obj[player].nickname, obj[player].order);
                 }
@@ -961,7 +957,7 @@ app.io.on("connection", (socket) => {
                 for (const [sid, userData] of Object.entries(
                     roomsInfo.rooms.hide[room_name].sockets
                   )) {
-                  userData.reset(-1);
+                  userData.reset();
                 }
               }
             }
@@ -1081,7 +1077,7 @@ function updateRoomDisconnect(socket, room_name, roomsObj) {
         for (const [sid, userData] of Object.entries(
             roomsObj[room_name].sockets
           )) {
-          userData.reset(-1);
+          userData.reset();
         }
       }
 
@@ -1102,7 +1098,7 @@ function updateRoomDisconnect(socket, room_name, roomsObj) {
   }
 
   // update/reset user
-  socket.userData.reset(-1);
+  socket.userData.reset();
   socket.userData.leaveRoom();
 
   app.io.to(room_name).emit("refresh game room", roomsObj[room_name]);
