@@ -366,9 +366,13 @@ $(function () {
     $("#statistics").empty(); // Clear first
     $("#statistics-media").empty();
     let tmp = new Array(8).fill(null);
+    console.log(leaderBoard);
     // APPEND PLAYERS
     try {
       leaderBoard.forEach((val, i) => {
+        if (val == null) {
+          return;
+        }
         if (tmp[val[0]] != null) {
           tmp[val[0]] = null;
           return;
@@ -379,14 +383,14 @@ $(function () {
       tmp.forEach((val, i) => {
         console.log(val, i);
         let div = $(
-          `<div class="col w-100 pointsDiv"> ${val} ${toJobs(i, leaderBoard.length())} </div>`
+          `<div class="col w-100 pointsDiv"> ${val} ${toJob(i, leaderBoard.length)} </div>`
         );
         let spaceDiv = $('<div class="w-100"></div>');
         if (width > 600) $("#statistics").append(div, spaceDiv);
         else $("#statistics-media").append(div, spaceDiv);
       });
     } catch (error) {
-      // console.log(error);
+      console.log(error);
     }
   }
 
