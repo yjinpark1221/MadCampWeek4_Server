@@ -297,10 +297,10 @@ $(function () {
       if ($("#error-msg").textContent == "혁명을 하시겠습니까?") {
         console.log("클릭 없음, 혁명 X");
         socket.emit("revolution", false);
-      }
-      const buttonContainer = document.getElementById("button-container");
-      while (buttonContainer.firstChild) {
-        buttonContainer.removeChild(buttonContainer.firstChild);
+        const buttonContainer = document.getElementById("button-container");
+        while (buttonContainer.firstChild) {
+          buttonContainer.removeChild(buttonContainer.firstChild);
+        }
       }
     }, 5000);
   }
@@ -459,6 +459,10 @@ $(function () {
     console.log("예 클릭, 혁명");
     socket.emit("revolution", true);
     $("#error-msg").text("혁명을 일으킵니다");
+    const buttonContainer = document.getElementById("button-container");
+    while (buttonContainer.firstChild) {
+      buttonContainer.removeChild(buttonContainer.firstChild);
+    }
   }
 
   // '아니오' 버튼 클릭 이벤트 처리
@@ -468,7 +472,11 @@ $(function () {
     console.log("아니오 클릭, 혁명 X");
     socket.emit("revolution", false);
     $("#error-msg").text("혁명을 일으키지 않습니다.");
-  }
+    const buttonContainer = document.getElementById("button-container");
+    while (buttonContainer.firstChild) {
+      buttonContainer.removeChild(buttonContainer.firstChild);
+    }
+}
 
   let jollyCount = 0;
 
